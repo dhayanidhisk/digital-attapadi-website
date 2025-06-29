@@ -109,6 +109,10 @@
             cursor: move;
             user-select: none; /* Prevent text selection during drag */
         }
+        .gemini-btn:disabled {
+            background-color: #a78bfa;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex justify-center">
@@ -218,11 +222,11 @@
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyAKzzQ9QLz6J09B9MZxubTtsnMjAJ6u7zU",
             authDomain: "digital-attappadi.firebaseapp.com",
-            projectId: "digital-attapadi",
+            projectId: "digital-attappadi",
             storageBucket: "digital-attappadi.appspot.com",
             messagingSenderId: "580499598706",
-            appId: "1:580499598706:web:358c81171f3a342241c1eb",
-            measurementId: "G-32YT6GGYJZ"
+            appId: "1:580499598706:web:67aea3df47c453ee41c1eb",
+            measurementId: "G-Z7TGEXE8GY"
         };
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
@@ -472,6 +476,44 @@
                 confirmActionBtn.onclick = null;
             };
 
+            // --- GEMINI API ---
+            const suggestRouteWithAI = async (origin, destination) => {
+                const suggestBtn = document.getElementById('suggest-route-btn');
+                suggestBtn.disabled = true;
+                suggestBtn.textContent = 'Thinking...';
+
+                const prompt = `Provide a JSON array of major bus stop names for a route in Attappadi, Kerala, starting from "${origin}" and ending at "${destination}". Only include the names of the stops in the array.`;
+                const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                const payload = { contents: chatHistory };
+                const apiKey = ""; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+                    
+                    if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0]) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        const stops = JSON.parse(text);
+                        if(Array.isArray(stops)) {
+                            return stops;
+                        }
+                    }
+                    throw new Error("Could not parse AI response.");
+                } catch (error) {
+                    console.error("Gemini API Error:", error);
+                    showMessage("Could not get AI suggestion. Please try again.");
+                    return null;
+                } finally {
+                    suggestBtn.disabled = false;
+                    suggestBtn.textContent = '✨ Suggest Route with AI';
+                }
+            };
+
             // --- FIRESTORE CRUD OPERATIONS ---
             const handleAddBus = async () => {
                 if (!isAuthReady || !busCollection) {
@@ -557,7 +599,11 @@
                 const stopOptions = predefinedStops.map(s => `<option value="${s}">${s}</option>`).join('');
                 const formHtml = `
                     <div><label class="block text-left text-sm font-medium text-gray-700">Stop Name:</label><select id="stop-name-select" name="name" class="mt-1 w-full px-3 py-2 border rounded" required><option value="" disabled selected>Select a stop</option>${stopOptions}<option value="custom">Other...</option></select><div id="custom-stop-name-container" class="hidden mt-2"><input type="text" name="custom_name" class="w-full px-3 py-2 border rounded" placeholder="Enter Custom Stop Name"></div></div>
-                    <div><label class="block text-left text-sm font-medium text-gray-700">Scheduled Time:</label><div class="flex items-center space-x-2 mt-1"><input type="number" name="hour" class="w-1/3 px-3 py-2 border rounded" placeholder="Hr" min="1" max="12" required><span class="font-bold">:</span><input type="number" name="minute" class="w-1/3 px-3 py-2 border rounded" placeholder="Min" min="0" max="59" required><select name="ampm" class="w-1/3 px-3 py-2 border rounded"><option>AM</option><option>PM</option></select></div></div>`;
+                    <div><label class="block text-left text-sm font-medium text-gray-700">Scheduled Time:</label><div class="flex items-center space-x-2 mt-1"><input type="number" name="hour" class="w-1/3 px-3 py-2 border rounded" placeholder="Hr" min="1" max="12" required><span class="font-bold">:</span><input type="number" name="minute" class="w-1/3 px-3 py-2 border rounded" placeholder="Min" min="0" max="59" required><select name="ampm" class="w-1/3 px-3 py-2 border rounded"><option>AM</option><option>PM</option></select></div></div>
+                    <div class="pt-2">
+                        <button type="button" id="suggest-route-btn" class="w-full gemini-btn bg-purple-600 text-white font-bold py-2 px-4 rounded">✨ Suggest Route with AI</button>
+                    </div>
+                `;
                 try {
                     const data = await showModal('Add Stop', formHtml);
                     data.scheduledTime = to24Hour(data.hour, data.minute, data.ampm);
