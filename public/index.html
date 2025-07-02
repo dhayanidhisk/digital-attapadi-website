@@ -105,17 +105,6 @@
         #message-box {
             transition: opacity 0.3s, transform 0.3s;
         }
-        /* Draggable Admin Bar Style */
-        #live-admin-bar {
-            position: fixed;
-            bottom: 1.5rem;
-            right: 1.5rem;
-            z-index: 30;
-            user-select: none; /* Prevent text selection during drag */
-        }
-        #live-admin-bar.draggable {
-             cursor: move;
-        }
         /* Sidebar Styles */
         #sidebar {
             transition: transform 0.3s ease-in-out;
@@ -146,13 +135,14 @@
                  <div class="w-16">
                      <button id="menu-btn" class="p-2 rounded-full hover:bg-gray-100">
                          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                           <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                          </svg>
                      </button>
                  </div>
                  <div class="text-center">
                      <h1 class="text-xl font-bold text-gray-800">Digital Attappadi</h1>
                      <p class="text-xs text-gray-500">Makkal Raja Transport Corporation</p>
+                     <p id="live-clock" class="text-xs text-gray-500 font-mono mt-1"></p>
                  </div>
                  <div class="w-16"></div> <!-- Spacer to keep title centered -->
              </div>
@@ -215,12 +205,12 @@
     <div id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-40">
         <div class="p-4 border-b flex items-center space-x-3">
              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
+               <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+               <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+             </svg>
             <h2 class="text-base font-bold">Digital Attappadi</h2>
         </div>
-        <nav class="p-2">
+        <nav class="p-2 space-y-1">
             <a href="#" data-page="home" class="nav-link flex items-center px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -239,13 +229,14 @@
                 </svg>
                 <span>Contact</span>
             </a>
+            <div class="border-t my-2"></div>
+            <a href="#" id="admin-nav-link" class="nav-link flex items-center px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <span id="admin-link-text">Admin Login</span>
+            </a>
         </nav>
-    </div>
-
-
-    <!-- Floating Live Clock and Admin Button -->
-    <div id="live-admin-bar">
-        <!-- Content will be injected by JavaScript -->
     </div>
 
     <!-- Edit Modal -->
@@ -339,7 +330,6 @@
             // --- DOM ELEMENTS ---
             const scheduleList = document.getElementById('schedule-list');
             const statusMessage = document.getElementById('status-message');
-            const liveAdminBar = document.getElementById('live-admin-bar');
             const addBusContainer = document.getElementById('add-bus-container');
             const addBusBtn = document.getElementById('add-bus-btn');
             const searchBar = document.getElementById('search-bar');
@@ -347,6 +337,9 @@
             const sidebar = document.getElementById('sidebar');
             const sidebarOverlay = document.getElementById('sidebar-overlay');
             const pageContainer = document.getElementById('page-container');
+            const liveClock = document.getElementById('live-clock');
+            const adminNavLink = document.getElementById('admin-nav-link');
+            const adminLinkText = document.getElementById('admin-link-text');
             
             // Modals
             const editModal = document.getElementById('edit-modal');
@@ -364,6 +357,10 @@
             const messageText = document.getElementById('message-text');
 
             // --- DATA CONSTANTS ---
+            const adminUsers = [
+                { username: 'dhayaceoda', password: '90474470770', name: 'Dhaya(Thangakutty)' },
+                { username: 'poonutty', password: '0313', name: 'Madhu(Poonutty)' }
+            ];
             const predefinedBusNames = ['KSRTC', 'SPR', 'SRG', 'KMS', 'RPC', 'Abirami'];
             const predefinedOriginStops = ['Anaikkatty', 'Sholayur', 'Goolikkadavu Jn', 'Mannarkkad', 'Palakkad'];
             const predefinedDestinationStops = ['Anaikkatty', 'Goolikkadavu Jn', 'Mannarkkad', 'Palakkad'];
@@ -460,16 +457,21 @@
             };
 
             const login = async () => {
+                closeSidebar();
                 const formHtml = `
                     <div><label class="block text-left text-sm font-medium text-gray-700">Username</label><input class="mt-1 w-full px-3 py-2 border rounded" type="text" name="username" required></div>
                     <div><label class="block text-left text-sm font-medium text-gray-700">Password</label><input class="mt-1 w-full px-3 py-2 border rounded" type="password" name="password" required></div>`;
                 try {
                     const data = await showModal('Admin Login', formHtml, 'Login');
-                    if (data.username === "dhayaceoda" && data.password === "90474470770") {
+                    const user = adminUsers.find(u => u.username === data.username && u.password === data.password);
+                    
+                    if (user) {
                         localStorage.setItem('isAdmin', 'true');
-                        showMessage("Admin mode enabled.");
+                        localStorage.setItem('adminUser', user.name);
+                        showMessage(`Admin mode enabled for ${user.name}.`);
                     } else {
                         localStorage.removeItem('isAdmin');
+                        localStorage.removeItem('adminUser');
                         showMessage("Incorrect username or password.");
                     }
                     checkAdminStatus();
@@ -479,49 +481,35 @@
             };
 
             const logout = () => {
+                const adminName = localStorage.getItem('adminUser');
                 localStorage.removeItem('isAdmin');
-                showMessage("Admin mode disabled.");
+                localStorage.removeItem('adminUser');
+                showMessage(`Admin ${adminName || ''} logged out.`);
                 openDropdowns.clear();
-                // Reset admin bar to default position on logout
-                liveAdminBar.style.top = '';
-                liveAdminBar.style.left = '';
-                liveAdminBar.style.bottom = '1.5rem';
-                liveAdminBar.style.right = '1.5rem';
                 checkAdminStatus();
+                closeSidebar();
             };
 
             const renderAuthControls = () => {
                 if (isAdmin) {
-                    liveAdminBar.innerHTML = `
-                        <div class="flex items-center space-x-2 bg-gray-800 text-white rounded-full p-1 shadow-lg">
-                            <span id="live-clock" class="pl-2 text-xs font-medium">Live: --:-- --</span>
-                            <button id="logout-btn" class="bg-red-600 text-white font-bold py-1 px-3 rounded-full text-xs">Logout</button>
-                        </div>
-                    `;
-                    document.getElementById('logout-btn').addEventListener('click', logout);
-                    liveAdminBar.classList.remove('draggable');
+                    const adminName = localStorage.getItem('adminUser');
+                    adminLinkText.textContent = `Logout (${adminName || 'Admin'})`;
+                    adminNavLink.onclick = (e) => { e.preventDefault(); logout(); };
                 } else {
-                    liveAdminBar.innerHTML = `
-                        <div class="flex items-center space-x-2 bg-gray-800 text-white rounded-full p-1 shadow-lg">
-                            <span id="live-clock" class="pl-2 text-xs font-medium">Live: --:-- --</span>
-                            <button id="login-btn" class="bg-blue-600 text-white font-bold py-1 px-3 rounded-full text-xs">Admin</button>
-                        </div>
-                    `;
-                    document.getElementById('login-btn').addEventListener('click', login);
-                    liveAdminBar.classList.add('draggable');
+                    adminLinkText.textContent = 'Admin Login';
+                    adminNavLink.onclick = (e) => { e.preventDefault(); login(); };
                 }
                 addBusContainer.classList.toggle('hidden', !isAdmin);
             };
 
             const updateClock = () => {
-                const clockElement = document.getElementById('live-clock');
-                if (clockElement) {
+                if (liveClock) {
                     const timeString = new Date().toLocaleTimeString('en-US', {
                         hour: '2-digit',
                         minute: '2-digit',
                         hour12: true
                     });
-                    clockElement.textContent = `Live: ${timeString}`;
+                    liveClock.textContent = `Live: ${timeString}`;
                 }
             };
 
@@ -633,6 +621,18 @@
                             { name: "Goolikkadavu Jn", scheduledTime: "14:00" },
                             { name: "Mukkali", scheduledTime: "14:45" },
                             { name: "Mannarkkad", scheduledTime: "15:15" },
+                        ]
+                    },
+                    {
+                        busNumber: "SRG",
+                        origin: "Mannarkkad",
+                        destination: "Anaikkatty",
+                        stops: [
+                            { name: "Mannarkkad", scheduledTime: "17:30" },
+                            { name: "Mukkali", scheduledTime: "18:00" },
+                            { name: "Goolikkadavu Jn", scheduledTime: "18:45" },
+                            { name: "Agali Jn", scheduledTime: "19:15" },
+                            { name: "Anaikatti", scheduledTime: "19:45" },
                         ]
                     }
                 ];
@@ -905,8 +905,8 @@
                 const currentTime = new Date();
                 
                 let liveBusData = busData.map(bus => {
-                    if (bus.stops.length === 0) {
-                        return { ...bus, etaAtGoolikkadavu: null, liveIconPositionIndex: 0 };
+                    if (!bus.stops || bus.stops.length === 0) {
+                        return { ...bus, stops: [], etaAtGoolikkadavu: null, liveIconPositionIndex: 0 };
                     }
                     
                     const goolikkadavuStop = bus.stops.find(stop => stop.name === 'Goolikkadavu Jn');
@@ -952,19 +952,15 @@
                     });
                 }
                 
-                // Sort the filtered data
+                // Sort the filtered data chronologically by departure time
                 filteredBusData.sort((a, b) => {
-                    const etaA = a.etaAtGoolikkadavu;
-                    const etaB = b.etaAtGoolikkadavu;
-                    const groupA = etaA === null ? 3 : (etaA < 0 ? 2 : 1);
-                    const groupB = etaB === null ? 3 : (etaB < 0 ? 2 : 1);
-
-                    if (groupA !== groupB) return groupA - groupB;
-                    if (groupA === 1) return etaA - etaB;
-                    if (groupA === 2) return etaB - etaA;
-                    
                     const timeA = a.stops.length > 0 ? parseTime(a.stops[0].scheduledTime) : 0;
                     const timeB = b.stops.length > 0 ? parseTime(b.stops[0].scheduledTime) : 0;
+                    
+                    if (!timeA && !timeB) return 0;
+                    if (!timeA) return 1;
+                    if (!timeB) return -1;
+
                     return timeA - timeB;
                 });
                 
@@ -1009,85 +1005,12 @@
             menuBtn.addEventListener('click', openSidebar);
             sidebarOverlay.addEventListener('click', closeSidebar);
             sidebar.addEventListener('click', (e) => {
-                if (e.target.closest('.nav-link')) {
+                const navLink = e.target.closest('.nav-link');
+                if (navLink && navLink.id !== 'admin-nav-link') {
                     e.preventDefault();
-                    showPage(e.target.closest('.nav-link').dataset.page + '-page');
+                    showPage(navLink.dataset.page + '-page');
                 }
             });
-
-            // --- DRAGGABLE FLOATING BUTTON ---
-            const makeDraggable = (elmnt) => {
-                let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-
-                const dragMouseDown = (e) => {
-                    if (e.target.tagName === 'BUTTON' || isAdmin) return;
-                    e = e || window.event;
-                    e.preventDefault();
-                    pos3 = e.clientX;
-                    pos4 = e.clientY;
-                    document.onmouseup = closeDragElement;
-                    document.onmousemove = elementDrag;
-                };
-
-                const elementDrag = (e) => {
-                    e = e || window.event;
-                    e.preventDefault();
-                    pos1 = pos3 - e.clientX;
-                    pos2 = pos4 - e.clientY;
-                    pos3 = e.clientX;
-                    pos4 = e.clientY;
-                    
-                    let newTop = elmnt.offsetTop - pos2;
-                    let newLeft = elmnt.offsetLeft - pos1;
-
-                    if (newTop < 0) newTop = 0;
-                    if (newLeft < 0) newLeft = 0;
-                    if (newTop + elmnt.offsetHeight > window.innerHeight) newTop = window.innerHeight - elmnt.offsetHeight;
-                    if (newLeft + elmnt.offsetWidth > window.innerWidth) newLeft = window.innerWidth - elmnt.offsetWidth;
-                    
-                    elmnt.style.top = newTop + "px";
-                    elmnt.style.left = newLeft + "px";
-                    elmnt.style.bottom = 'auto';
-                    elmnt.style.right = 'auto';
-                };
-
-                const closeDragElement = () => {
-                    document.onmouseup = null;
-                    document.onmousemove = null;
-                };
-                
-                const touchStart = (e) => {
-                    if (e.target.tagName === 'BUTTON' || isAdmin) return;
-                    pos3 = e.touches[0].clientX;
-                    pos4 = e.touches[0].clientY;
-                    document.ontouchend = closeDragElement;
-                    document.ontouchmove = touchMove;
-                };
-
-                const touchMove = (e) => {
-                    e = e || window.event;
-                    pos1 = pos3 - e.touches[0].clientX;
-                    pos2 = pos4 - e.touches[0].clientY;
-                    pos3 = e.touches[0].clientX;
-                    pos4 = e.touches[0].clientY;
-                    
-                    let newTop = elmnt.offsetTop - pos2;
-                    let newLeft = elmnt.offsetLeft - pos1;
-                    
-                    if (newTop < 0) newTop = 0;
-                    if (newLeft < 0) newLeft = 0;
-                    if (newTop + elmnt.offsetHeight > window.innerHeight) newTop = window.innerHeight - elmnt.offsetHeight;
-                    if (newLeft + elmnt.offsetWidth > window.innerWidth) newLeft = window.innerWidth - elmnt.offsetWidth;
-
-                    elmnt.style.top = newTop + "px";
-                    elmnt.style.left = newLeft + "px";
-                    elmnt.style.bottom = 'auto';
-                    elmnt.style.right = 'auto';
-                };
-
-                elmnt.onmousedown = dragMouseDown;
-                elmnt.ontouchstart = touchStart;
-            };
 
             // --- INITIALIZATION ---
             const init = () => {
@@ -1098,7 +1021,6 @@
                 auth = getAuth(app);
                 setLogLevel('debug');
 
-                makeDraggable(liveAdminBar);
                 showPage('home-page'); // Show home page by default
 
                 onAuthStateChanged(auth, async (user) => {
@@ -1113,7 +1035,14 @@
 
                         unsubscribeFromBuses = onSnapshot(busCollection, (snapshot) => {
                             busData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                            if (busData.length === 0) {
+                            // Ensure stops is always an array
+                            busData.forEach(bus => {
+                                if (!bus.stops) {
+                                    bus.stops = [];
+                                }
+                            });
+                            
+                            if (snapshot.docs.length === 0) {
                                 addSampleDataIfNeeded();
                             } else {
                                 updateAndRenderSchedule();
