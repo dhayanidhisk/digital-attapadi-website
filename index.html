@@ -484,7 +484,7 @@
                 { username: 'dhayaceoda', password: '90474470770', name: 'Dhaya(Thangakutty)' },
                 { username: 'poonutty', password: '0313', name: 'Madhu(Poonutty)' }
             ];
-            const predefinedBusNames = ['KSRTC', 'SPR', 'SRG', 'KMS', 'RPC', 'Abirami'];
+            const predefinedBusNames = ['KSRTC', 'SPR', 'SRG', 'KMS', 'RPC', 'Abirami', 'SSG', 'JAI', 'RKG'];
             const predefinedOriginStops = ['Anaikkatty', 'Sholayur', 'Goolikkadavu Jn', 'Mannarkkad', 'Palakkad'];
             const predefinedDestinationStops = ['Anaikkatty', 'Goolikkadavu Jn', 'Mannarkkad', 'Palakkad'];
             const predefinedStops = ['Anaikatti', 'Kottathara', 'Agali Jn', 'Goolikkadavu Jn', 'Thavalam', 'Mukkali', 'Mannarkkad', 'Palakkad'];
@@ -855,6 +855,84 @@
                             { name: "Mannarkkad", scheduledTime: "19:00", fare: 45, waitingTime: 5 },
                             { name: "Palakkad", scheduledTime: "20:00", fare: 45, waitingTime: 0 },
                         ]
+                    },
+                    {
+                        busNumber: "SRG",
+                        origin: "Goolikkadavu Jn",
+                        destination: "Anaikkatty",
+                        seatCapacity: 38,
+                        status: { type: 'on-time', minutes: 0 },
+                        stops: [
+                            { name: "Goolikkadavu Jn", scheduledTime: "11:30", fare: 0, waitingTime: 0 },
+                            { name: "Agali Jn", scheduledTime: "11:40", fare: 10, waitingTime: 2 },
+                            { name: "Kottathara", scheduledTime: "12:00", fare: 15, waitingTime: 0 },
+                            { name: "Anaikkatty", scheduledTime: "12:30", fare: 20, waitingTime: 0 },
+                        ]
+                    },
+                    {
+                        busNumber: "KMS",
+                        origin: "Mannarkkad",
+                        destination: "Sholayur",
+                        seatCapacity: 45,
+                        status: { type: 'early', minutes: 3 },
+                        stops: [
+                            { name: "Mannarkkad", scheduledTime: "14:00", fare: 0, waitingTime: 0 },
+                            { name: "Mukkali", scheduledTime: "14:45", fare: 20, waitingTime: 0 },
+                            { name: "Goolikkadavu Jn", scheduledTime: "15:15", fare: 25, waitingTime: 5 },
+                            { name: "Sholayur", scheduledTime: "16:15", fare: 30, waitingTime: 0 },
+                        ]
+                    },
+                    {
+                        busNumber: "Abirami",
+                        origin: "Palakkad",
+                        destination: "Goolikkadavu Jn",
+                        seatCapacity: 42,
+                        status: { type: 'on-time', minutes: 0 },
+                        stops: [
+                            { name: "Palakkad", scheduledTime: "10:30", fare: 0, waitingTime: 0 },
+                            { name: "Mannarkkad", scheduledTime: "11:30", fare: 40, waitingTime: 5 },
+                            { name: "Mukkali", scheduledTime: "12:00", fare: 22, waitingTime: 0 },
+                            { name: "Goolikkadavu Jn", scheduledTime: "12:30", fare: 25, waitingTime: 0 },
+                        ]
+                    },
+                    {
+                        busNumber: "SSG", 
+                        origin: "Anaikkatty",
+                        destination: "Palakkad",
+                        seatCapacity: 40,
+                        status: { type: 'on-time', minutes: 0 },
+                        stops: [
+                            { name: "Anaikkatty", scheduledTime: "09:15", fare: 0, waitingTime: 0 },
+                            { name: "Kottathara", scheduledTime: "09:45", fare: 20, waitingTime: 2 },
+                            { name: "Goolikkadavu Jn", scheduledTime: "10:15", fare: 15, waitingTime: 5 },
+                            { name: "Mannarkkad", scheduledTime: "11:15", fare: 45, waitingTime: 5 },
+                            { name: "Palakkad", scheduledTime: "12:15", fare: 45, waitingTime: 0 },
+                        ]
+                    },
+                    {
+                        busNumber: "JAI",
+                        origin: "Palakkad",
+                        destination: "Sholayur",
+                        seatCapacity: 44,
+                        status: { type: 'on-time', minutes: 0 },
+                        stops: [
+                            { name: "Palakkad", scheduledTime: "13:00", fare: 0, waitingTime: 0 },
+                            { name: "Mannarkkad", scheduledTime: "14:00", fare: 45, waitingTime: 5 },
+                            { name: "Goolikkadavu Jn", scheduledTime: "15:00", fare: 45, waitingTime: 5 },
+                            { name: "Sholayur", scheduledTime: "16:00", fare: 30, waitingTime: 0 },
+                        ]
+                    },
+                    {
+                        busNumber: "RKG",
+                        origin: "Goolikkadavu Jn",
+                        destination: "Palakkad",
+                        seatCapacity: 49,
+                        status: { type: 'late', minutes: 8 },
+                        stops: [
+                            { name: "Goolikkadavu Jn", scheduledTime: "16:30", fare: 0, waitingTime: 0 },
+                            { name: "Mannarkkad", scheduledTime: "17:30", fare: 45, waitingTime: 5 },
+                            { name: "Palakkad", scheduledTime: "18:30", fare: 45, waitingTime: 0 },
+                        ]
                     }
                 ];
 
@@ -883,6 +961,48 @@
                     // Add sample fares for RPC
                     await setDoc(doc(faresCollection, 'RPC'), {
                         "Sholayur_Goolikkadavu Jn": 30,
+                        "Goolikkadavu Jn_Mannarkkad": 45,
+                        "Mannarkkad_Palakkad": 45
+                    });
+                    
+                    // Add sample fares for SRG
+                    await setDoc(doc(faresCollection, 'SRG'), {
+                        "Goolikkadavu Jn_Agali Jn": 10,
+                        "Agali Jn_Kottathara": 15,
+                        "Kottathara_Anaikkatty": 20
+                    });
+
+                    // Add sample fares for KMS
+                    await setDoc(doc(faresCollection, 'KMS'), {
+                        "Mannarkkad_Mukkali": 20,
+                        "Mukkali_Goolikkadavu Jn": 25,
+                        "Goolikkadavu Jn_Sholayur": 30
+                    });
+
+                    // Add sample fares for Abirami
+                    await setDoc(doc(faresCollection, 'Abirami'), {
+                        "Palakkad_Mannarkkad": 40,
+                        "Mannarkkad_Mukkali": 22,
+                        "Mukkali_Goolikkadavu Jn": 25
+                    });
+
+                    // Add sample fares for SSG
+                    await setDoc(doc(faresCollection, 'SSG'), {
+                        "Anaikkatty_Kottathara": 20,
+                        "Kottathara_Goolikkadavu Jn": 15,
+                        "Goolikkadavu Jn_Mannarkkad": 45,
+                        "Mannarkkad_Palakkad": 45
+                    });
+
+                    // Add sample fares for JAI
+                    await setDoc(doc(faresCollection, 'JAI'), {
+                        "Palakkad_Mannarkkad": 45,
+                        "Mannarkkad_Goolikkadavu Jn": 45,
+                        "Goolikkadavu Jn_Sholayur": 30
+                    });
+
+                    // Add sample fares for RKG
+                    await setDoc(doc(faresCollection, 'RKG'), {
                         "Goolikkadavu Jn_Mannarkkad": 45,
                         "Mannarkkad_Palakkad": 45
                     });
@@ -1694,8 +1814,9 @@
                         unsubscribeFromBuses = onSnapshot(busCollection, (snapshot) => {
                             busData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                             isAuthReady = true; // Mark as ready once we get data
+                            
                             // The check inside addSampleDataIfNeeded will prevent re-adding data
-                            if(isAdmin) addSampleDataIfNeeded();
+                            addSampleDataIfNeeded();
                             updateAndRenderSchedule();
                         }, (error) => {
                             console.error("Error fetching bus data:", error);
