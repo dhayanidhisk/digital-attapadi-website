@@ -31,14 +31,15 @@
         .timeline-item {
             position: relative;
             padding-left: 2.5rem; /* Space for the line and dot */
-            min-height: 4.5rem; /* 72px - Min height for positioning */
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
         }
         /* Static dot for each stop */
         .timeline-item::before {
             content: '';
             position: absolute;
             left: 1.25rem;
-            top: 0.25rem;
+            top: 1rem;
             height: 0.75rem;
             width: 0.75rem;
             background-color: #dbeafe; /* blue-100 */
@@ -51,8 +52,8 @@
             content: '';
             position: absolute;
             left: 1.5625rem; /* Aligns with the center of the dot */
-            top: 0.75rem; /* Start below the dot */
-            bottom: -0.75rem; /* Extend to the next dot */
+            top: 1.5rem; /* Start below the dot */
+            bottom: -1.5rem; /* Extend to the next dot */
             width: 2px;
             background-color: #bfdbfe; /* blue-200 */
         }
@@ -127,6 +128,9 @@
             color: #2563eb;
             font-weight: 600;
         }
+        .bus-item.watched > .bus-header {
+            background-color: #eff6ff; /* Tailwind's blue-50 */
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex justify-center">
@@ -187,6 +191,36 @@
                 </div>
             </div>
 
+            <!-- Fare Calculator Page Content -->
+            <div id="fare-calculator-page" class="hidden p-6">
+                <h2 class="text-xl font-bold mb-4">Fare Calculator</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="from-stop" class="block text-sm font-medium text-gray-700">From</label>
+                        <select id="from-stop" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"></select>
+                    </div>
+                    <div>
+                        <label for="to-stop" class="block text-sm font-medium text-gray-700">To</label>
+                        <select id="to-stop" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"></select>
+                    </div>
+                    <button id="calculate-fare-btn" class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded">Calculate Fare</button>
+                    <div id="fare-result" class="mt-4 text-center"></div>
+                </div>
+            </div>
+
+             <!-- Manage Fares Page Content -->
+             <div id="manage-fares-page" class="hidden p-6">
+                <h2 class="text-xl font-bold mb-4">Manage Fares</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="fare-bus-select" class="block text-sm font-medium text-gray-700">Select Bus Route</label>
+                        <select id="fare-bus-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"></select>
+                    </div>
+                    <form id="fare-matrix-container" class="space-y-2 max-h-96 overflow-y-auto"></form>
+                    <button id="save-fares-btn" class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded hidden">Save Fares</button>
+                </div>
+            </div>
+
             <!-- About Page Content -->
             <div id="about-page" class="hidden p-6">
                 <h2 class="text-xl font-bold mb-4">About Digital Attappadi</h2>
@@ -230,6 +264,12 @@
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span>Bus Schedule</span>
+            </a>
+            <a href="#" data-page="fare-calculator" class="nav-link flex items-center px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 8h6m-5 0a3 3 0 110 6H9l3 3m-3-6h6m6 1a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Fare Calculator</span>
             </a>
             <a href="#" data-page="about" class="nav-link flex items-center px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -352,36 +392,40 @@
         // --- Canvas Environment Integration ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'digital-attapadi';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            // This is a fallback configuration for local development.
-            // The actual config will be provided by the Canvas environment.
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "digital-attapadi",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID",
-            measurementId: "YOUR_MEASUREMENT_ID"
+            apiKey: "AIzaSyAKzzQ9QLz6J09B9MZxubTtsnMjAJ6u7zU",
+            authDomain: "digital-attappadi.firebaseapp.com",
+            projectId: "digital-attappadi",
+            storageBucket: "digital-attappadi.appspot.com",
+            messagingSenderId: "580499598706",
+            appId: "1:580499598706:web:358c81171f3a342241c1eb",
+            measurementId: "G-32YT6GGYJZ"
         };
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
         // --- Firebase Services ---
-        let app, db, auth, analytics, busCollection, filterStopsDocRef;
+        let app, db, auth, analytics, busCollection, filterStopsDocRef, faresCollection;
 
         document.addEventListener('DOMContentLoaded', function() {
           try {
             // --- STATE ---
             let busData = [];
             let filterableStops = [];
+            let watchedBuses = [];
+            let notifiedBuses = [];
+            let fareMatrix = {};
             const openDropdowns = new Set();
             let isAdmin = false;
             let currentUserId = null;
             let isAuthReady = false;
             let unsubscribeFromBuses = null;
             let unsubscribeFromFilters = null;
+            let unsubscribeFromFares = null;
             let modalResolve = null;
             let modalReject = null;
             let searchQuery = '';
             let currentFilter = 'all'; // 'all', 'live', or a stop name
+            let pressTimer = null;
+            let longPress = false;
             
             // --- DOM ELEMENTS ---
             const scheduleList = document.getElementById('schedule-list');
@@ -397,6 +441,13 @@
             const adminMenuItems = document.getElementById('admin-menu-items');
             const filterBtn = document.getElementById('filter-btn');
             const filterDropdown = document.getElementById('filter-dropdown');
+            const fromStopSelect = document.getElementById('from-stop');
+            const toStopSelect = document.getElementById('to-stop');
+            const calculateFareBtn = document.getElementById('calculate-fare-btn');
+            const fareResultDiv = document.getElementById('fare-result');
+            const fareBusSelect = document.getElementById('fare-bus-select');
+            const fareMatrixContainer = document.getElementById('fare-matrix-container');
+            const saveFaresBtn = document.getElementById('save-fares-btn');
             
             // Modals
             const editModal = document.getElementById('edit-modal');
@@ -492,7 +543,8 @@
                 Array.from(pageContainer.children).forEach(page => {
                     page.classList.add('hidden');
                 });
-                document.getElementById(pageId).classList.remove('hidden');
+                const newPage = document.getElementById(pageId);
+                if(newPage) newPage.classList.remove('hidden');
                 
                 document.querySelectorAll('.nav-link').forEach(link => {
                     link.classList.remove('active');
@@ -500,6 +552,12 @@
                         link.classList.add('active');
                     }
                 });
+
+                if (pageId === 'fare-calculator-page') {
+                    populateFareCalculatorStops();
+                } else if (pageId === 'manage-fares-page') {
+                    populateFareBusSelect();
+                }
 
                 closeSidebar();
             };
@@ -562,6 +620,10 @@
                     const adminName = localStorage.getItem('adminUser');
                     adminMenuItems.innerHTML = `
                         <div class="border-t my-2"></div>
+                        <a href="#" data-page="manage-fares" class="nav-link flex items-center px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                            <span>Manage Fares</span>
+                        </a>
                         <a href="#" id="manage-stops-link" class="nav-link flex items-center px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                             <span>Manage Stops</span>
@@ -726,36 +788,14 @@
                         busNumber: "KSRTC",
                         origin: "Palakkad",
                         destination: "Anaikkatty",
+                        seatCapacity: 48,
+                        status: { type: 'on-time', minutes: 0 },
                         stops: [
-                            { name: "Palakkad", scheduledTime: "08:00", fare: 0 },
-                            { name: "Mannarkkad", scheduledTime: "09:00", fare: 45 },
-                            { name: "Goolikkadavu Jn", scheduledTime: "10:00", fare: 90 },
-                            { name: "Kottathara", scheduledTime: "10:30", fare: 110 },
-                            { name: "Anaikatti", scheduledTime: "11:00", fare: 130 },
-                        ]
-                    },
-                    {
-                        busNumber: "SPR",
-                        origin: "Anaikkatty",
-                        destination: "Mannarkkad",
-                        stops: [
-                            { name: "Anaikatti", scheduledTime: "13:00", fare: 0 },
-                            { name: "Agali Jn", scheduledTime: "13:30", fare: 20 },
-                            { name: "Goolikkadavu Jn", scheduledTime: "14:00", fare: 40 },
-                            { name: "Mukkali", scheduledTime: "14:45", fare: 70 },
-                            { name: "Mannarkkad", scheduledTime: "15:15", fare: 90 },
-                        ]
-                    },
-                    {
-                        busNumber: "SRG",
-                        origin: "Mannarkkad",
-                        destination: "Anaikkatty",
-                        stops: [
-                            { name: "Mannarkkad", scheduledTime: "17:30", fare: 0 },
-                            { name: "Mukkali", scheduledTime: "18:00", fare: 20 },
-                            { name: "Goolikkadavu Jn", scheduledTime: "18:45", fare: 50 },
-                            { name: "Agali Jn", scheduledTime: "19:15", fare: 70 },
-                            { name: "Anaikatti", scheduledTime: "19:45", fare: 90 },
+                            { name: "Palakkad", scheduledTime: "08:00", fare: 0, waitingTime: 0 },
+                            { name: "Mannarkkad", scheduledTime: "09:00", fare: 45, waitingTime: 5 },
+                            { name: "Goolikkadavu Jn", scheduledTime: "10:00", fare: 45, waitingTime: 0 },
+                            { name: "Kottathara", scheduledTime: "10:30", fare: 20, waitingTime: 0 },
+                            { name: "Anaikatti", scheduledTime: "11:00", fare: 20, waitingTime: 0 },
                         ]
                     }
                 ];
@@ -765,7 +805,17 @@
                         await addDoc(busCollection, bus);
                     }
                     await setDoc(filterStopsDocRef, { stops: ['Goolikkadavu Jn', 'Mannarkkad', 'Anaikatti'] });
-                    showMessage("Added sample bus routes to get you started!");
+                    
+                    // Add sample fares
+                    const ksrtcDocRef = doc(faresCollection, 'KSRTC');
+                    await setDoc(ksrtcDocRef, {
+                        "Palakkad_Mannarkkad": 45,
+                        "Palakkad_Goolikkadavu Jn": 90,
+                        "Mannarkkad_Goolikkadavu Jn": 45,
+                        "Goolikkadavu Jn_Kottathara": 20
+                    });
+
+                    showMessage("Added sample bus routes and fares to get you started!");
                 } catch (error) {
                     console.error("Error adding sample data:", error);
                     showMessage("Could not add sample data.");
@@ -782,6 +832,7 @@
                 const destinationOptions = predefinedDestinationStops.map(s => `<option value="${s}">${s}</option>`).join('');
                 const formHtml = `
                     <div><label class="block text-left text-sm font-medium text-gray-700">Bus Name:</label><select id="bus-name-select" name="busNumber" class="mt-1 w-full px-3 py-2 border rounded" required><option value="" disabled selected>Select Bus Name</option>${busNameOptions}<option value="custom">Other...</option></select><div id="custom-bus-name-container" class="hidden mt-2"><input type="text" name="custom_busNumber" class="w-full px-3 py-2 border rounded" placeholder="Enter Custom Bus Name"></div></div>
+                    <div><label class="block text-left text-sm font-medium text-gray-700">Seat Capacity:</label><input type="number" name="seatCapacity" class="mt-1 w-full px-3 py-2 border rounded" placeholder="e.g., 48"></div>
                     <div><label class="block text-left text-sm font-medium text-gray-700">From:</label><select id="origin-select" name="origin" class="mt-1 w-full px-3 py-2 border rounded" required><option value="" disabled selected>Select Origin</option>${originOptions}<option value="custom">Other...</option></select><div id="custom-origin-container" class="hidden mt-2"><input type="text" name="custom_origin" class="w-full px-3 py-2 border rounded" placeholder="Enter Custom Origin"></div></div>
                     <div><label class="block text-left text-sm font-medium text-gray-700">To:</label><select id="destination-select" name="destination" class="mt-1 w-full px-3 py-2 border rounded" required><option value="" disabled selected>Select Destination</option>${destinationOptions}<option value="custom">Other...</option></select><div id="custom-destination-container" class="hidden mt-2"><input type="text" name="custom_destination" class="w-full px-3 py-2 border rounded" placeholder="Enter Custom Destination"></div></div>
                     <div><label class="block text-left text-sm font-medium text-gray-700">Departure Time from Origin:</label><div class="flex items-center space-x-2 mt-1"><input type="number" name="hour" class="w-1/3 px-3 py-2 border rounded" placeholder="Hr" min="1" max="12" required><span class="font-bold">:</span><input type="number" name="minute" class="w-1/3 px-3 py-2 border rounded" placeholder="Min" min="0" max="59" required><select name="ampm" class="w-1/3 px-3 py-2 border rounded"><option>AM</option><option>PM</option></select></div></div>
@@ -789,10 +840,14 @@
                 try {
                     const data = await showModal('Add New Bus', formHtml);
                     const scheduledTime = to24Hour(data.hour, data.minute, data.ampm);
-                    const firstStop = { name: data.origin, scheduledTime: scheduledTime, fare: 0 };
+                    const firstStop = { name: data.origin, scheduledTime: scheduledTime, fare: 0, waitingTime: 0 };
                     const newBus = { 
-                        busNumber: data.busNumber, origin: data.origin, destination: data.destination,
-                        stops: [firstStop]
+                        busNumber: data.busNumber, 
+                        origin: data.origin, 
+                        destination: data.destination,
+                        seatCapacity: Number(data.seatCapacity) || null,
+                        stops: [firstStop],
+                        status: { type: 'on-time', minutes: 0 }
                     };
                     await addDoc(busCollection, newBus);
                     showMessage("New bus route added successfully.");
@@ -820,6 +875,7 @@
                 const formHtml = `
                     <input type="hidden" name="id" value="${bus.id}">
                     <div><label class="block text-left text-sm font-medium text-gray-700">Bus Name:</label><select id="bus-name-select" name="busNumber" class="mt-1 w-full px-3 py-2 border rounded">${busNameOptions}<option value="custom" ${isCustomBusName ? 'selected' : ''}>Other...</option></select><div id="custom-bus-name-container" class="hidden mt-2"><input type="text" name="custom_busNumber" class="w-full px-3 py-2 border rounded" placeholder="Enter Custom Bus Name" value="${isCustomBusName ? bus.busNumber : ''}"></div></div>
+                    <div><label class="block text-left text-sm font-medium text-gray-700">Seat Capacity:</label><input type="number" name="seatCapacity" class="mt-1 w-full px-3 py-2 border rounded" placeholder="e.g., 48" value="${bus.seatCapacity || ''}"></div>
                     <div><label class="block text-left text-sm font-medium text-gray-700">From:</label><select id="origin-select" name="origin" class="mt-1 w-full px-3 py-2 border rounded">${originOptions}<option value="custom" ${isCustomOrigin ? 'selected' : ''}>Other...</option></select><div id="custom-origin-container" class="hidden mt-2"><input type="text" name="custom_origin" class="w-full px-3 py-2 border rounded" placeholder="Enter Custom Origin" value="${isCustomOrigin ? bus.origin : ''}"></div></div>
                     <div><label class="block text-left text-sm font-medium text-gray-700">To:</label><select id="destination-select" name="destination" class="mt-1 w-full px-3 py-2 border rounded">${destinationOptions}<option value="custom" ${isCustomDestination ? 'selected' : ''}>Other...</option></select><div id="custom-destination-container" class="hidden mt-2"><input type="text" name="custom_destination" class="w-full px-3 py-2 border rounded" placeholder="Enter Custom Destination" value="${isCustomDestination ? bus.destination : ''}"></div></div>
                 `;
@@ -829,7 +885,8 @@
                     await updateDoc(busDocRef, {
                         busNumber: data.busNumber,
                         origin: data.origin,
-                        destination: data.destination
+                        destination: data.destination,
+                        seatCapacity: Number(data.seatCapacity) || null
                     });
                     showMessage("Bus details updated.");
                 } catch(error) {
@@ -847,7 +904,8 @@
                 showConfirmation("This will permanently delete the entire bus route and all its stops. This action cannot be undone.", async () => {
                     try {
                         await deleteDoc(doc(db, busCollection.path, busId));
-                        showMessage("Bus route deleted.");
+                        await deleteDoc(doc(db, faresCollection.path, busId)); // Also delete fares
+                        showMessage("Bus route and fares deleted.");
                     } catch(error) {
                         console.error("Error deleting bus:", error);
                         showMessage(`Error: Could not delete bus. ${error.message}`);
@@ -862,12 +920,13 @@
                 const formHtml = `
                     <div><label class="block text-left text-sm font-medium text-gray-700">Stop Name:</label><select id="stop-name-select" name="name" class="mt-1 w-full px-3 py-2 border rounded" required><option value="" disabled selected>Select a stop</option>${stopOptions}<option value="custom">Other...</option></select><div id="custom-stop-name-container" class="hidden mt-2"><input type="text" name="custom_name" class="w-full px-3 py-2 border rounded" placeholder="Enter Custom Stop Name"></div></div>
                     <div><label class="block text-left text-sm font-medium text-gray-700">Scheduled Time:</label><div class="flex items-center space-x-2 mt-1"><input type="number" name="hour" class="w-1/3 px-3 py-2 border rounded" placeholder="Hr" min="1" max="12" required><span class="font-bold">:</span><input type="number" name="minute" class="w-1/3 px-3 py-2 border rounded" placeholder="Min" min="0" max="59" required><select name="ampm" class="w-1/3 px-3 py-2 border rounded"><option>AM</option><option>PM</option></select></div></div>
-                    <div><label class="block text-left text-sm font-medium text-gray-700">Fare (₹):</label><input type="number" name="fare" class="mt-1 w-full px-3 py-2 border rounded" placeholder="e.g., 50" value="0" required></div>
+                    <div><label class="block text-left text-sm font-medium text-gray-700">Fare from Previous Stop (₹):</label><input type="number" name="fare" class="mt-1 w-full px-3 py-2 border rounded" placeholder="e.g., 25" value="0" required></div>
+                    <div><label class="block text-left text-sm font-medium text-gray-700">Waiting Time (mins):</label><input type="number" name="waitingTime" class="mt-1 w-full px-3 py-2 border rounded" placeholder="e.g., 5" value="0"></div>
                 `;
                 try {
                     const data = await showModal('Add Stop', formHtml);
                     data.scheduledTime = to24Hour(data.hour, data.minute, data.ampm);
-                    const newStops = [...bus.stops, { name: data.name, scheduledTime: data.scheduledTime, fare: Number(data.fare) || 0 }];
+                    const newStops = [...bus.stops, { name: data.name, scheduledTime: data.scheduledTime, fare: Number(data.fare) || 0, waitingTime: Number(data.waitingTime) || 0 }];
                     newStops.sort((a, b) => parseTime(a.scheduledTime) - parseTime(b.scheduledTime));
                     await updateDoc(doc(db, busCollection.path, busId), { stops: newStops });
                     showMessage("Stop added to route.");
@@ -891,13 +950,14 @@
                 const formHtml = `
                     <div><label class="block text-left text-sm font-medium text-gray-700">Stop Name:</label><select id="stop-name-select" name="name" class="mt-1 w-full px-3 py-2 border rounded" required>${stopOptions}<option value="custom" ${isCustomStop ? 'selected' : ''}>Other...</option></select><div id="custom-stop-name-container" class="hidden mt-2"><input type="text" name="custom_name" class="w-full px-3 py-2 border rounded" placeholder="Enter Custom Stop Name" value="${isCustomStop ? stop.name : ''}"></div></div>
                     <div><label class="block text-left text-sm font-medium text-gray-700">Scheduled Time:</label><div class="flex items-center space-x-2 mt-1"><input type="number" name="hour" class="w-1/3 px-3 py-2 border rounded" value="${time12.hour}" min="1" max="12" required><span class="font-bold">:</span><input type="number" name="minute" class="w-1/3 px-3 py-2 border rounded" value="${time12.minute}" min="0" max="59" required><select name="ampm" class="w-1/3 px-3 py-2 border rounded"><option ${time12.ampm === 'AM' ? 'selected' : ''}>AM</option><option ${time12.ampm === 'PM' ? 'selected' : ''}>PM</option></select></div></div>
-                    <div><label class="block text-left text-sm font-medium text-gray-700">Fare (₹):</label><input type="number" name="fare" class="mt-1 w-full px-3 py-2 border rounded" placeholder="e.g., 50" value="${stop.fare || 0}" required></div>
+                    <div><label class="block text-left text-sm font-medium text-gray-700">Fare from Previous Stop (₹):</label><input type="number" name="fare" class="mt-1 w-full px-3 py-2 border rounded" placeholder="e.g., 25" value="${stop.fare || 0}" required></div>
+                    <div><label class="block text-left text-sm font-medium text-gray-700">Waiting Time (mins):</label><input type="number" name="waitingTime" class="mt-1 w-full px-3 py-2 border rounded" placeholder="e.g., 5" value="${stop.waitingTime || 0}"></div>
                 `;
                 try {
                     const data = await showModal('Edit Stop', formHtml);
                     data.scheduledTime = to24Hour(data.hour, data.minute, data.ampm);
                     const newStops = [...bus.stops];
-                    newStops[stopIndex] = { name: data.name, scheduledTime: data.scheduledTime, fare: Number(data.fare) || 0 };
+                    newStops[stopIndex] = { ...newStops[stopIndex], name: data.name, scheduledTime: data.scheduledTime, fare: Number(data.fare) || 0, waitingTime: Number(data.waitingTime) || 0 };
                     newStops.sort((a,b) => parseTime(a.scheduledTime) - parseTime(b.scheduledTime));
                     await updateDoc(doc(db, busCollection.path, busId), { stops: newStops });
                     showMessage("Stop details updated.");
@@ -911,20 +971,20 @@
                 }
             };
             
-            const handleDeleteStop = (busId, stopIndex) => {
-                if (!isAuthReady) { showMessage("Not connected. Please wait."); return; }
-                showConfirmation("This will remove the stop from the route. Are you sure?", async () => {
-                    try {
-                        const bus = busData.find(b => b.id === busId);
-                        const newStops = [...bus.stops];
-                        newStops.splice(stopIndex, 1);
-                        await updateDoc(doc(db, busCollection.path, busId), { stops: newStops });
-                        showMessage("Stop removed from route.");
-                    } catch(error) {
-                        console.error("Error deleting stop:", error);
-                        showMessage(`Error: Could not delete stop. ${error.message}`);
-                    }
-                });
+            const handleDeleteStop = async (busId, stopIndex) => {
+                 if (!isAuthReady) { showMessage("Not connected. Please wait."); return; }
+                 showConfirmation("This will remove the stop from the route. Are you sure?", async () => {
+                     try {
+                         const bus = busData.find(b => b.id === busId);
+                         const newStops = [...bus.stops];
+                         newStops.splice(stopIndex, 1);
+                         await updateDoc(doc(db, busCollection.path, busId), { stops: newStops });
+                         showMessage("Stop removed.");
+                     } catch(error) {
+                         console.error("Error deleting stop:", error);
+                         showMessage(`Error: Could not delete stop. ${error.message}`);
+                     }
+                 });
             };
 
             const addFilterStop = async (stopName) => {
@@ -940,6 +1000,43 @@
                 await setDoc(filterStopsDocRef, { stops: newStops });
                 showMessage(`Removed "${stopName}" from filters.`);
                 showManageStopsModal(); // Refresh the modal
+            };
+
+            const handleUpdateStatus = async (busId) => {
+                const bus = busData.find(b => b.id === busId);
+                const currentStatus = bus.status || { type: 'on-time', minutes: 0 };
+                
+                const formHtml = `
+                    <div>
+                        <label class="block text-left text-sm font-medium text-gray-700">Status</label>
+                        <select id="status-type" name="type" class="mt-1 w-full px-3 py-2 border rounded">
+                            <option value="on-time" ${currentStatus.type === 'on-time' ? 'selected' : ''}>On time</option>
+                            <option value="late" ${currentStatus.type === 'late' ? 'selected' : ''}>Late</option>
+                            <option value="early" ${currentStatus.type === 'early' ? 'selected' : ''}>Early</option>
+                        </select>
+                    </div>
+                    <div id="status-minutes-container" class="${currentStatus.type === 'on-time' ? 'hidden' : ''}">
+                        <label class="block text-left text-sm font-medium text-gray-700">Minutes</label>
+                        <input type="number" name="minutes" class="mt-1 w-full px-3 py-2 border rounded" value="${currentStatus.minutes || 0}">
+                    </div>
+                `;
+
+                try {
+                    const data = await showModal('Update Bus Status', formHtml, 'Update');
+                    const newStatus = {
+                        type: data.type,
+                        minutes: data.type === 'on-time' ? 0 : Number(data.minutes) || 0
+                    };
+                    await updateDoc(doc(db, busCollection.path, busId), { status: newStatus });
+                    showMessage('Bus status updated.');
+                } catch(error) {
+                     if (error.message.includes("Modal cancelled")) {
+                        console.log("Update status operation cancelled.");
+                    } else {
+                        console.error("Error updating status:", error);
+                        showMessage(`Error: Could not update status. ${error.message}`);
+                    }
+                }
             };
 
             // --- RENDER FUNCTIONS ---
@@ -995,7 +1092,9 @@
                     const liveIconTopPosition = bus.liveIconPositionIndex * itemHeight;
 
                     let stopsHtml = '';
+                    let cumulativeFare = 0;
                     bus.stops.forEach((stop, index) => {
+                        cumulativeFare += stop.fare || 0;
                         const stopDepartureTime = parseTime(stop.scheduledTime);
                         const stopEta = Math.round((stopDepartureTime - new Date()) / 60000);
                         let stopArrivalText = `Scheduled ${formatTime(stopDepartureTime)}`;
@@ -1005,7 +1104,8 @@
                         const isPassed = stopEta < 0;
                         const passedClass = isPassed ? 'passed' : '';
                         
-                        const fareText = stop.fare ? `<p class="text-xs text-green-600 font-semibold">₹${stop.fare}</p>` : '';
+                        const fareText = index > 0 ? `<p class="text-xs text-green-600 font-semibold">₹${cumulativeFare}</p>` : '';
+                        const waitTimeText = stop.waitingTime > 0 ? `<p class="text-xs text-blue-600 mt-1">☕ Take Coffee Cup 🕒 ${stop.waitingTime} min wait</p>` : '';
 
                         const editButtons = showAdminControls ? `
                             <div class="flex items-center space-x-2">
@@ -1019,11 +1119,15 @@
                                 ${fareText}
                             </div>
                         `;
-
+                        
                         stopsHtml += `
                             <div class="timeline-item ${passedClass}">
                                 <div class="flex justify-between items-start">
-                                    <div><p class="stop-name">${stop.name}</p><p class="text-xs text-gray-500">${stopArrivalText}</p></div>
+                                    <div>
+                                        <p class="stop-name">${stop.name}</p>
+                                        <p class="text-xs text-gray-500">${stopArrivalText}</p>
+                                        ${waitTimeText}
+                                    </div>
                                     ${editButtons}
                                 </div>
                             </div>`;
@@ -1031,7 +1135,7 @@
                     
                     let addStopButtonHtml = '';
                     if (showAdminControls) {
-                        addStopButtonHtml = `<div class="pl-10 pt-2"><button class="add-stop-btn edit-btn" data-bus-id="${bus.id}">+ Add Stop</button></div>`;
+                        addStopButtonHtml = `<div class="p-2 border-t mt-2 flex justify-around"><button class="add-stop-btn edit-btn" data-bus-id="${bus.id}">+ Add Stop</button><button class="update-status-btn edit-btn" data-bus-id="${bus.id}">Update Status</button></div>`;
                     }
 
                     const editBusButtons = showAdminControls ? `
@@ -1041,23 +1145,33 @@
                         </div>
                     `: '';
 
-                    const subtext = bus.etaAtGoolikkadavu === null 
-                        ? `<span class="text-yellow-600"> - Add 'Goolikkadavu Jn' stop to track.</span>`
-                        : `<span>- On schedule</span>`;
+                    let subtext = '';
+                    if (bus.status && bus.status.type !== 'on-time') {
+                        subtext = `<span class="${bus.status.type === 'late' ? 'text-red-600' : 'text-blue-600'}">${bus.status.minutes} min ${bus.status.type}</span>`;
+                    } else {
+                        subtext = `<span class="text-green-600">On time</span>`;
+                    }
+                    
+                    if (bus.seatCapacity) {
+                        subtext += ` <span class="text-gray-500 mx-1">|</span> <span>💺 ${bus.seatCapacity}</span>`;
+                    }
+
+                    const isWatched = watchedBuses.includes(bus.id);
+                    const watchedClass = isWatched ? 'watched' : '';
 
                     const listItem = document.createElement('div');
-                    listItem.className = 'bus-item relative border-b';
+                    listItem.className = `bus-item relative border-b ${watchedClass}`;
                     listItem.innerHTML = `
                         ${editBusButtons}
                         <div class="bus-header p-4 flex items-center cursor-pointer" data-bus-id="${bus.id}">
                             <span class="text-3xl mr-4">🚍</span>
                             <div class="flex-grow">
                                  <div class="flex items-baseline mb-1"><p class="font-bold text-sm text-gray-800">${bus.busNumber}</p><p class="text-xs font-medium text-gray-600 ml-2"><span class="inline-block bg-gray-100 text-gray-800 px-2 py-0.5 rounded">${bus.origin} - ${bus.destination}</span></p></div>
-                                 <div class="flex items-center space-x-1 text-xs text-gray-500">${subtext}</div>
+                                 <div class="flex items-center space-x-1 text-xs font-medium">${subtext}</div>
                             </div>
                             <div class="text-right"><p class="${arrivalColor} ${arrivalSize}">${arrivalText}</p></div>
                         </div>
-                        <div id="details-${bus.id}" class="bus-details px-4 pb-4 ${isDropdownOpen ? '' : 'hidden'}">
+                        <div id="details-${bus.id}" class="bus-details bg-gray-50 px-4 pb-4 ${isDropdownOpen ? '' : 'hidden'}">
                             <div class="timeline-wrapper">
                                 ${stopsHtml}
                                 ${bus.stops.length > 0 && !bus.isFinished ? `<span class="live-dot-icon" style="top: ${liveIconTopPosition}px;"></span>` : ''}
@@ -1073,20 +1187,36 @@
                 const currentTime = new Date();
                 
                 let liveBusData = busData.map(bus => {
+                    const status = bus.status || { type: 'on-time', minutes: 0 };
+                    let statusOffset = 0;
+                    if (status.type === 'late') {
+                        statusOffset = status.minutes * 60000;
+                    } else if (status.type === 'early') {
+                        statusOffset = -status.minutes * 60000;
+                    }
+
                     if (!bus.stops || bus.stops.length === 0) {
                         return { ...bus, stops: [], etaAtGoolikkadavu: null, liveIconPositionIndex: 0, isFinished: true };
                     }
                     
-                    const goolikkadavuStop = bus.stops.find(stop => stop.name === 'Goolikkadavu Jn');
-                    
+                    let cumulativeWait = 0;
+                    let goolikkadavuArrivalTime = null;
+                    for(const stop of bus.stops) {
+                        const stopArrivalTime = parseTime(stop.scheduledTime).getTime() + cumulativeWait + statusOffset;
+                        if (stop.name === 'Goolikkadavu Jn') {
+                            goolikkadavuArrivalTime = stopArrivalTime;
+                            break;
+                        }
+                        cumulativeWait += (stop.waitingTime || 0) * 60000;
+                    }
+
                     let etaAtGoolikkadavu = null;
-                    if (goolikkadavuStop) {
-                        const goolikkadavuArrivalTime = parseTime(goolikkadavuStop.scheduledTime);
-                        etaAtGoolikkadavu = Math.round((goolikkadavuArrivalTime - currentTime) / 60000);
+                    if (goolikkadavuArrivalTime !== null) {
+                        etaAtGoolikkadavu = Math.round((goolikkadavuArrivalTime - currentTime.getTime()) / 60000);
                     }
 
                     let liveIconPositionIndex = 0;
-                    const nextStopIndex = bus.stops.findIndex(stop => parseTime(stop.scheduledTime) > currentTime);
+                    const nextStopIndex = bus.stops.findIndex(stop => (parseTime(stop.scheduledTime).getTime() + statusOffset) > currentTime.getTime());
                     const isFinished = nextStopIndex === -1;
 
                     if (isFinished) {
@@ -1094,17 +1224,31 @@
                     } else if (nextStopIndex > 0) {
                         const lastStop = bus.stops[nextStopIndex - 1];
                         const nextStop = bus.stops[nextStopIndex];
-                        const lastStopTime = parseTime(lastStop.scheduledTime).getTime();
-                        const nextStopTime = parseTime(nextStop.scheduledTime).getTime();
-                        const segmentDuration = nextStopTime - lastStopTime;
-                        if (segmentDuration > 0) {
-                            const progressInSegment = (currentTime.getTime() - lastStopTime) / segmentDuration;
-                            liveIconPositionIndex = (nextStopIndex - 1) + Math.min(1, Math.max(0, progressInSegment));
+                        
+                        const lastStopArrivalTime = parseTime(lastStop.scheduledTime).getTime() + statusOffset;
+                        const lastStopDepartureTime = lastStopArrivalTime + (lastStop.waitingTime || 0) * 60000;
+                        
+                        const nextStopArrivalTime = parseTime(nextStop.scheduledTime).getTime() + statusOffset;
+                        
+                        if (currentTime.getTime() >= lastStopArrivalTime && currentTime.getTime() < lastStopDepartureTime) {
+                            liveIconPositionIndex = nextStopIndex - 1;
                         } else {
-                            liveIconPositionIndex = nextStopIndex -1;
+                            const segmentDuration = nextStopArrivalTime - lastStopDepartureTime;
+                            if (segmentDuration > 0) {
+                                const progressInSegment = (currentTime.getTime() - lastStopDepartureTime) / segmentDuration;
+                                liveIconPositionIndex = (nextStopIndex - 1) + Math.min(1, Math.max(0, progressInSegment));
+                            } else {
+                                liveIconPositionIndex = nextStopIndex - 1;
+                            }
                         }
                     } else {
                          liveIconPositionIndex = 0;
+                    }
+
+                    // Check for notifications
+                    if (watchedBuses.includes(bus.id) && !notifiedBuses.includes(bus.id) && etaAtGoolikkadavu !== null && etaAtGoolikkadavu <= 5 && etaAtGoolikkadavu > 0) {
+                        showMessage(`Bus ${bus.busNumber} is approx. ${etaAtGoolikkadavu} minutes away!`);
+                        notifiedBuses.push(bus.id);
                     }
                     
                     return { ...bus, etaAtGoolikkadavu, liveIconPositionIndex, isFinished };
@@ -1144,6 +1288,117 @@
                 renderSchedule(filteredBusData);
             };
             
+            const populateFareCalculatorStops = () => {
+                const allStops = new Set();
+                busData.forEach(bus => {
+                    bus.stops.forEach(stop => allStops.add(stop.name));
+                });
+                const sortedStops = [...allStops].sort();
+                const optionsHtml = sortedStops.map(stop => `<option value="${stop}">${stop}</option>`).join('');
+                fromStopSelect.innerHTML = `<option value="">Select starting point</option>${optionsHtml}`;
+                toStopSelect.innerHTML = `<option value="">Select destination</option>${optionsHtml}`;
+                fareResultDiv.innerHTML = '';
+            };
+
+            const handleCalculateFare = () => {
+                const fromStopName = fromStopSelect.value;
+                const toStopName = toStopSelect.value;
+
+                if (!fromStopName || !toStopName) {
+                    fareResultDiv.innerHTML = `<p class="text-red-500">Please select both a starting and destination stop.</p>`;
+                    return;
+                }
+
+                if (fromStopName === toStopName) {
+                    fareResultDiv.innerHTML = `<p class="text-lg font-bold">Fare: ₹0</p>`;
+                    return;
+                }
+
+                let foundRoute = false;
+                for (const bus of busData) {
+                    const fromIndex = bus.stops.findIndex(s => s.name === fromStopName);
+                    const toIndex = bus.stops.findIndex(s => s.name === toStopName);
+
+                    if (fromIndex !== -1 && toIndex !== -1 && toIndex > fromIndex) {
+                        const busFares = fareMatrix[bus.id] || {};
+                        const fareKey = `${fromStopName}_${toStopName}`;
+                        const fare = busFares[fareKey];
+
+                        if (fare !== undefined) {
+                             fareResultDiv.innerHTML = `
+                                <p class="text-gray-600">The fare from <strong>${fromStopName}</strong> to <strong>${toStopName}</strong> is:</p>
+                                <p class="text-3xl font-bold text-blue-600 mt-2">₹${fare}</p>
+                                <p class="text-xs text-gray-500 mt-1">(via ${bus.busNumber})</p>
+                            `;
+                            foundRoute = true;
+                            break; 
+                        }
+                    }
+                }
+
+                if (!foundRoute) {
+                    fareResultDiv.innerHTML = `<p class="text-red-500">No direct bus route or fare found between these two stops.</p>`;
+                }
+            };
+            
+            const populateFareBusSelect = () => {
+                const optionsHtml = busData.map(bus => `<option value="${bus.id}">${bus.busNumber} (${bus.origin} - ${bus.destination})</option>`).join('');
+                fareBusSelect.innerHTML = `<option value="">Select a bus route</option>${optionsHtml}`;
+                fareMatrixContainer.innerHTML = '';
+                saveFaresBtn.classList.add('hidden');
+            };
+            
+            const renderFareMatrix = (busId) => {
+                const bus = busData.find(b => b.id === busId);
+                if (!bus) return;
+
+                const busFares = fareMatrix[bus.id] || {};
+                let matrixHtml = '';
+
+                for (let i = 0; i < bus.stops.length; i++) {
+                    for (let j = i + 1; j < bus.stops.length; j++) {
+                        const from = bus.stops[i].name;
+                        const to = bus.stops[j].name;
+                        const key = `${from}_${to}`;
+                        const value = busFares[key] || '';
+                        matrixHtml += `
+                            <div class="flex items-center space-x-2">
+                                <label class="w-2/5 text-right text-sm font-medium text-gray-500">${from} to ${to}</label>
+                                <input type="number" data-key="${key}" class="fare-input mt-1 w-3/5 px-3 py-2 border rounded" value="${value}" placeholder="Fare (₹)">
+                            </div>
+                        `;
+                    }
+                }
+                fareMatrixContainer.innerHTML = matrixHtml;
+                saveFaresBtn.classList.remove('hidden');
+            };
+
+            const handleSaveFares = async () => {
+                const busId = fareBusSelect.value;
+                if (!busId) {
+                    showMessage("Please select a bus route first.");
+                    return;
+                }
+
+                const fareInputs = fareMatrixContainer.querySelectorAll('.fare-input');
+                const newFares = {};
+                fareInputs.forEach(input => {
+                    const key = input.dataset.key;
+                    const value = input.value;
+                    if (value) {
+                        newFares[key] = Number(value);
+                    }
+                });
+
+                try {
+                    await setDoc(doc(faresCollection, busId), newFares);
+                    showMessage("Fares saved successfully!");
+                } catch (error) {
+                    console.error("Error saving fares:", error);
+                    showMessage("Error saving fares.");
+                }
+            };
+            
             // --- EVENT LISTENERS ---
             confirmCancelBtn.addEventListener('click', hideConfirmation);
             addBusBtn.addEventListener('click', handleAddBus);
@@ -1152,20 +1407,48 @@
                 updateAndRenderSchedule();
             });
             
-            scheduleList.addEventListener('click', (e) => {
-                const button = e.target.closest('button');
+            scheduleList.addEventListener('mousedown', (e) => {
                 const header = e.target.closest('.bus-header');
+                if (!header) return;
 
-                if (button) {
-                    const busId = button.dataset.busId;
-                    const stopIndex = button.dataset.stopIndex;
+                longPress = false; 
+                pressTimer = window.setTimeout(() => {
+                    longPress = true;
+                    const busId = header.dataset.busId;
+                    const bus = busData.find(b => b.id === busId);
+                    if (!bus || bus.etaAtGoolikkadavu === null) {
+                        showMessage("Can only watch buses with a calculable ETA.");
+                        return;
+                    }
 
-                    if (button.matches('.edit-bus-btn')) handleEditBus(busId);
-                    if (button.matches('.delete-bus-btn')) handleDeleteBus(busId);
-                    if (button.matches('.edit-stop-btn')) handleEditStop(busId, parseInt(stopIndex, 10));
-                    if (button.matches('.delete-stop-btn')) handleDeleteStop(busId, parseInt(stopIndex, 10));
-                    if (button.matches('.add-stop-btn')) handleAddStop(busId);
-                } else if (header) {
+                    const index = watchedBuses.indexOf(busId);
+                    if (index > -1) {
+                        watchedBuses.splice(index, 1);
+                        showMessage(`Notifications turned OFF for ${bus.busNumber}.`);
+                    } else {
+                        watchedBuses.push(busId);
+                        showMessage(`Notifications turned ON for ${bus.busNumber}.`);
+                    }
+                    localStorage.setItem('watchedBuses', JSON.stringify(watchedBuses));
+                    updateAndRenderSchedule();
+                }, 500);
+            });
+
+            scheduleList.addEventListener('mouseup', () => {
+                clearTimeout(pressTimer);
+            });
+
+            scheduleList.addEventListener('click', (e) => {
+                if (longPress) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
+
+                const header = e.target.closest('.bus-header');
+                const button = e.target.closest('button');
+
+                if (header && !button) {
                     const busId = header.dataset.busId;
                     const details = document.getElementById(`details-${busId}`);
                     if (details) {
@@ -1176,6 +1459,22 @@
                             openDropdowns.add(busId);
                         }
                     }
+                } else if (button) {
+                    const busId = button.dataset.busId;
+                    const stopIndex = button.dataset.stopIndex;
+
+                    if (button.matches('.edit-bus-btn')) handleEditBus(busId);
+                    else if (button.matches('.delete-bus-btn')) handleDeleteBus(busId);
+                    else if (button.matches('.edit-stop-btn')) handleEditStop(busId, parseInt(stopIndex, 10));
+                    else if (button.matches('.delete-stop-btn')) handleDeleteStop(busId, parseInt(stopIndex, 10));
+                    else if (button.matches('.add-stop-btn')) handleAddStop(busId);
+                    else if (button.matches('.update-status-btn')) handleUpdateStatus(busId);
+                }
+            });
+
+            scheduleList.addEventListener('contextmenu', e => {
+                if (e.target.closest('.bus-header')) {
+                    e.preventDefault();
                 }
             });
 
@@ -1211,7 +1510,6 @@
 
                 const filterValue = target.dataset.filter;
                 if (filterValue === 'select-stop') {
-                    // If admin is logged in, show the management modal. Otherwise, show the user filter.
                     if (isAdmin) {
                         showManageStopsModal();
                     } else {
@@ -1269,6 +1567,10 @@
                 }
             });
 
+            calculateFareBtn.addEventListener('click', handleCalculateFare);
+            fareBusSelect.addEventListener('change', () => renderFareMatrix(fareBusSelect.value));
+            saveFaresBtn.addEventListener('click', handleSaveFares);
+
             window.addEventListener('click', (e) => {
                 if (!filterBtn.contains(e.target) && !filterDropdown.contains(e.target)) {
                     filterDropdown.classList.add('hidden');
@@ -1277,6 +1579,9 @@
 
             // --- INITIALIZATION ---
             const initializeAppAndData = async () => {
+                // Load watched buses from local storage
+                watchedBuses = JSON.parse(localStorage.getItem('watchedBuses')) || [];
+
                 // Initialize Firebase
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
@@ -1296,10 +1601,12 @@
                         const publicDataPath = `artifacts/${appId}/public/data`;
                         busCollection = collection(db, `${publicDataPath}/buses`);
                         filterStopsDocRef = doc(db, `${publicDataPath}/config/filterStops`);
+                        faresCollection = collection(db, `${publicDataPath}/fares`);
 
                         // Detach old listeners if they exist
                         if (unsubscribeFromBuses) unsubscribeFromBuses();
                         if (unsubscribeFromFilters) unsubscribeFromFilters();
+                        if (unsubscribeFromFares) unsubscribeFromFares();
 
                         // Attach new listeners
                         unsubscribeFromBuses = onSnapshot(busCollection, (snapshot) => {
@@ -1322,6 +1629,13 @@
                             updateAndRenderSchedule();
                         }, (error) => {
                             console.error("Error fetching filter stops:", error);
+                        });
+
+                        unsubscribeFromFares = onSnapshot(faresCollection, (snapshot) => {
+                            fareMatrix = {};
+                            snapshot.docs.forEach(doc => {
+                                fareMatrix[doc.id] = doc.data();
+                            });
                         });
 
                     } else {
