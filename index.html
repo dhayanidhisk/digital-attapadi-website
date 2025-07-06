@@ -136,7 +136,6 @@
 <body class="bg-gray-100 flex justify-center">
 
     <div class="w-full max-w-md bg-white min-h-screen shadow-lg">
-        <!-- Header -->
         <header class="bg-white sticky top-0 z-20 p-4 border-b border-gray-200 text-center shadow-sm">
              <div class="flex justify-between items-center">
                  <div class="w-16">
@@ -150,14 +149,11 @@
                      <h1 class="text-xl font-bold text-gray-800">Digital Attappadi</h1>
                      <p class="text-xs text-gray-500">Makkal Raja Transport Corporation</p>
                  </div>
-                 <div class="w-16"></div> <!-- Spacer to keep title centered -->
-             </div>
+                 <div class="w-16"></div> </div>
         </header>
         
         <div id="page-container">
-            <!-- Home Page Content -->
             <div id="home-page">
-                <!-- Search and Filter Bar -->
                 <div class="p-4 bg-gray-50 border-b border-gray-200">
                     <div class="flex items-center space-x-2">
                         <div class="relative flex-grow">
@@ -175,13 +171,11 @@
                                 </svg>
                             </button>
                             <div id="filter-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 py-1">
-                                <!-- Filter options will be dynamically inserted here -->
-                            </div>
+                                </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Bus Schedule List -->
                 <main id="schedule-list" class="divide-y divide-gray-200">
                      <p id="status-message" class="p-8 text-center text-gray-500">Initializing...</p>
                 </main>
@@ -191,7 +185,6 @@
                 </div>
             </div>
 
-            <!-- Fare Calculator Page Content -->
             <div id="fare-calculator-page" class="hidden p-6">
                 <h2 class="text-xl font-bold mb-4">Fare Calculator</h2>
                 <div class="space-y-4">
@@ -208,7 +201,6 @@
                 </div>
             </div>
 
-             <!-- Manage Fares Page Content -->
              <div id="manage-fares-page" class="hidden p-6">
                 <h2 class="text-xl font-bold mb-4">Manage Fares</h2>
                 <div class="space-y-4">
@@ -221,7 +213,6 @@
                 </div>
             </div>
 
-            <!-- About Page Content -->
             <div id="about-page" class="hidden p-6">
                 <h2 class="text-xl font-bold mb-4">About Digital Attappadi</h2>
                 <p class="text-gray-700 mb-4">
@@ -232,7 +223,6 @@
                 </p>
             </div>
 
-            <!-- Contact Page Content -->
             <div id="contact-page" class="hidden p-6">
                  <h2 class="text-xl font-bold mb-4">Contact Information</h2>
                  <div class="space-y-4 text-gray-700">
@@ -246,10 +236,8 @@
         </div>
     </div>
 
-    <!-- Sidebar Overlay -->
     <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-30"></div>
 
-    <!-- Sidebar -->
     <div id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-40">
         <div class="p-4 border-b flex items-center space-x-3">
              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -284,20 +272,17 @@
                 <span>Contact</span>
             </a>
             <div id="admin-menu-items">
-                <!-- Admin-only items will be injected here -->
-            </div>
+                </div>
         </nav>
     </div>
 
-    <!-- Edit Modal -->
     <div id="edit-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-40">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div class="mt-3 text-center">
                 <h3 id="modal-title" class="text-lg leading-6 font-medium text-gray-900">Edit Details</h3>
                 <div class="mt-2 px-7 py-3">
                     <form id="edit-form" class="space-y-4">
-                        <!-- Form fields will be injected here -->
-                    </form>
+                        </form>
                 </div>
                 <div class="items-center px-4 py-3">
                     <button id="modal-save" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -311,7 +296,6 @@
         </div>
     </div>
     
-    <!-- Confirmation Modal -->
     <div id="confirmation-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
         <div class="relative top-40 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div class="mt-3 text-center">
@@ -336,14 +320,12 @@
         </div>
     </div>
     
-    <!-- Stop Filter Modal -->
     <div id="stop-filter-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div class="mt-3">
                 <h3 class="text-lg leading-6 font-medium text-gray-900 text-center">Select your Stop</h3>
                 <div id="stop-filter-list" class="mt-4 max-h-80 overflow-y-auto">
-                    <!-- Stop list will be injected here -->
-                </div>
+                    </div>
                 <div class="items-center px-4 py-3">
                     <button id="stop-filter-cancel" class="mt-2 px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-300 focus:outline-none">
                         Close
@@ -353,14 +335,12 @@
         </div>
     </div>
 
-    <!-- Manage Stops Modal -->
     <div id="manage-stops-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div class="mt-3">
                 <h3 class="text-lg leading-6 font-medium text-gray-900 text-center">Manage Filter Stops</h3>
                 <div id="manage-stops-list" class="mt-4 max-h-60 overflow-y-auto divide-y">
-                    <!-- Manageable stop list will be injected here -->
-                </div>
+                    </div>
                 <div class="mt-4">
                     <select id="add-stop-select" class="w-full px-3 py-2 border rounded-md"></select>
                     <div id="custom-filter-stop-container" class="hidden mt-2">
@@ -377,12 +357,10 @@
         </div>
     </div>
 
-    <!-- Custom Message Box -->
     <div id="message-box" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg opacity-0 transform translate-y-2 z-50">
         <p id="message-text"></p>
     </div>
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
@@ -392,6 +370,7 @@
         // --- Canvas Environment Integration ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'digital-attapadi';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            // Your Firebase config object here
             apiKey: "AIzaSyAKzzQ9QLz6J09B9MZxubTtsnMjAJ6u7zU",
             authDomain: "digital-attappadi.firebaseapp.com",
             projectId: "digital-attappadi",
@@ -475,6 +454,10 @@
             const messageText = document.getElementById('message-text');
 
             // --- DATA CONSTANTS ---
+             // SECURITY WARNING: Storing admin credentials and logic on the client-side is highly insecure.
+             // Anyone with browser developer tools can view this code, find the credentials, and grant themselves admin privileges.
+             // For a production application, this should be replaced with a secure backend authentication system,
+             // such as Firebase Authentication with Custom Claims set via a Cloud Function.
             const adminUsers = [
                 { username: 'dhayaceoda', password: '90474470770', name: 'Dhaya(Thangakutty)' },
                 { username: 'poonutty', password: '0313', name: 'Madhu(Poonutty)' }
@@ -576,6 +559,7 @@
 
             // --- AUTHENTICATION ---
             const checkAdminStatus = () => {
+                // SECURITY: This check is purely client-side and insecure.
                 isAdmin = localStorage.getItem('isAdmin') === 'true';
                 renderAuthControls();
                 updateAndRenderSchedule();
@@ -680,27 +664,51 @@
                 
                 editModal.classList.remove('hidden');
                 
-                const setupCustomSelectListener = (selectId, containerId) => {
+                // Helper to manage "Other..." / custom input fields in modals
+                const setupCustomSelectListener = (selectId, containerId, inputName) => {
                     const selectEl = editForm.querySelector(selectId);
                     const containerEl = editForm.querySelector(containerId);
                     if (selectEl) {
-                        selectEl.onchange = () => {
+                        const inputEl = containerEl.querySelector(`input[name="${inputName}"]`);
+                        const updateVisibility = () => {
                             const isCustom = selectEl.value === 'custom';
                             containerEl.classList.toggle('hidden', !isCustom);
-                            containerEl.querySelector('input').required = isCustom;
+                            if (inputEl) inputEl.required = isCustom;
                         };
-                        // Trigger on load if a custom value was pre-filled
-                        if (![...selectEl.options].some(o => o.value === selectEl.value)) {
+                        
+                        selectEl.onchange = updateVisibility;
+                        
+                        // Initial check in case the modal is for editing and has a custom value
+                        if (![...selectEl.options].some(o => o.value === selectEl.value) && selectEl.value) {
                            selectEl.value = 'custom';
                         }
-                        selectEl.onchange();
+                        updateVisibility();
+                    }
+                };
+                
+                // Helper to add dynamic behavior to modals, like the status update dropdown
+                const setupModalEventListeners = () => {
+                    const statusTypeSelect = editForm.querySelector('#status-type');
+                    if(statusTypeSelect) {
+                        const minutesContainer = editForm.querySelector('#status-minutes-container');
+                        const minutesInput = editForm.querySelector('input[name="minutes"]');
+                        statusTypeSelect.addEventListener('change', () => {
+                            if (statusTypeSelect.value === 'on-time') {
+                                minutesContainer.classList.add('hidden');
+                                if(minutesInput) minutesInput.value = 0;
+                            } else {
+                                minutesContainer.classList.remove('hidden');
+                            }
+                        });
                     }
                 };
 
-                setupCustomSelectListener('#bus-name-select', '#custom-bus-name-container');
-                setupCustomSelectListener('#origin-select', '#custom-origin-container');
-                setupCustomSelectListener('#destination-select', '#custom-destination-container');
-                setupCustomSelectListener('#stop-name-select', '#custom-stop-name-container');
+                setupCustomSelectListener('#bus-name-select', '#custom-bus-name-container', 'custom_busNumber');
+                setupCustomSelectListener('#origin-select', '#custom-origin-container', 'custom_origin');
+                setupCustomSelectListener('#destination-select', '#custom-destination-container', 'custom_destination');
+                setupCustomSelectListener('#stop-name-select', '#custom-stop-name-container', 'custom_name');
+                setupModalEventListeners();
+
 
                 return new Promise((resolve, reject) => {
                     modalResolve = resolve;
@@ -901,10 +909,14 @@
 
             const handleDeleteBus = (busId) => {
                 if (!isAuthReady) { showMessage("Not connected. Please wait."); return; }
+                const busToDelete = busData.find(b => b.id === busId);
+                if (!busToDelete) return;
+                
                 showConfirmation("This will permanently delete the entire bus route and all its stops. This action cannot be undone.", async () => {
                     try {
+                        // Also delete fares associated with the bus's name (ID)
+                        await deleteDoc(doc(db, faresCollection.path, busToDelete.busNumber));
                         await deleteDoc(doc(db, busCollection.path, busId));
-                        await deleteDoc(doc(db, faresCollection.path, busId)); // Also delete fares
                         showMessage("Bus route and fares deleted.");
                     } catch(error) {
                         console.error("Error deleting bus:", error);
@@ -1060,7 +1072,7 @@
 
                 if (data.length === 0) {
                     if (searchQuery || currentFilter !== 'all') {
-                        setStatus(`No results found.`);
+                        setStatus(`No results found for your criteria.`);
                     } else {
                         const message = isAdmin
                             ? "No buses found. Click 'Add New Bus' to create a schedule."
@@ -1088,7 +1100,9 @@
                     }
                     
                     const isDropdownOpen = openDropdowns.has(bus.id);
-                    const itemHeight = 72;
+                    // NOTE: This hardcoded height assumes timeline items have a fixed height.
+                    // If content makes items taller, the dot's position might be inaccurate.
+                    const itemHeight = 72; 
                     const liveIconTopPosition = bus.liveIconPositionIndex * itemHeight;
 
                     let stopsHtml = '';
@@ -1238,6 +1252,7 @@
                                 const progressInSegment = (currentTime.getTime() - lastStopDepartureTime) / segmentDuration;
                                 liveIconPositionIndex = (nextStopIndex - 1) + Math.min(1, Math.max(0, progressInSegment));
                             } else {
+                                // If duration is zero or negative, place dot at the last stop.
                                 liveIconPositionIndex = nextStopIndex - 1;
                             }
                         }
@@ -1318,9 +1333,10 @@
                 for (const bus of busData) {
                     const fromIndex = bus.stops.findIndex(s => s.name === fromStopName);
                     const toIndex = bus.stops.findIndex(s => s.name === toStopName);
-
+                    
+                    // Fares are stored by bus number, which is assumed to be the doc ID in the 'fares' collection.
                     if (fromIndex !== -1 && toIndex !== -1 && toIndex > fromIndex) {
-                        const busFares = fareMatrix[bus.id] || {};
+                        const busFares = fareMatrix[bus.busNumber] || {};
                         const fareKey = `${fromStopName}_${toStopName}`;
                         const fare = busFares[fareKey];
 
@@ -1342,17 +1358,17 @@
             };
             
             const populateFareBusSelect = () => {
-                const optionsHtml = busData.map(bus => `<option value="${bus.id}">${bus.busNumber} (${bus.origin} - ${bus.destination})</option>`).join('');
+                const optionsHtml = busData.map(bus => `<option value="${bus.busNumber}">${bus.busNumber} (${bus.origin} - ${bus.destination})</option>`).join('');
                 fareBusSelect.innerHTML = `<option value="">Select a bus route</option>${optionsHtml}`;
                 fareMatrixContainer.innerHTML = '';
                 saveFaresBtn.classList.add('hidden');
             };
             
-            const renderFareMatrix = (busId) => {
-                const bus = busData.find(b => b.id === busId);
+            const renderFareMatrix = (busNumber) => {
+                const bus = busData.find(b => b.busNumber === busNumber);
                 if (!bus) return;
 
-                const busFares = fareMatrix[bus.id] || {};
+                const busFares = fareMatrix[busNumber] || {};
                 let matrixHtml = '';
 
                 for (let i = 0; i < bus.stops.length; i++) {
@@ -1374,8 +1390,8 @@
             };
 
             const handleSaveFares = async () => {
-                const busId = fareBusSelect.value;
-                if (!busId) {
+                const busNumber = fareBusSelect.value;
+                if (!busNumber) {
                     showMessage("Please select a bus route first.");
                     return;
                 }
@@ -1391,7 +1407,8 @@
                 });
 
                 try {
-                    await setDoc(doc(faresCollection, busId), newFares);
+                    // Save fares using the bus number as the document ID
+                    await setDoc(doc(faresCollection, busNumber), newFares);
                     showMessage("Fares saved successfully!");
                 } catch (error) {
                     console.error("Error saving fares:", error);
@@ -1603,7 +1620,7 @@
                         filterStopsDocRef = doc(db, `${publicDataPath}/config/filterStops`);
                         faresCollection = collection(db, `${publicDataPath}/fares`);
 
-                        // Detach old listeners if they exist
+                        // Detach old listeners if they exist to prevent memory leaks on re-authentication
                         if (unsubscribeFromBuses) unsubscribeFromBuses();
                         if (unsubscribeFromFilters) unsubscribeFromFilters();
                         if (unsubscribeFromFares) unsubscribeFromFares();
@@ -1612,7 +1629,8 @@
                         unsubscribeFromBuses = onSnapshot(busCollection, (snapshot) => {
                             busData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                             isAuthReady = true; // Mark as ready once we get data
-                            addSampleDataIfNeeded();
+                            // The check inside addSampleDataIfNeeded will prevent re-adding data
+                            if(isAdmin) addSampleDataIfNeeded();
                             updateAndRenderSchedule();
                         }, (error) => {
                             console.error("Error fetching bus data:", error);
@@ -1634,6 +1652,7 @@
                         unsubscribeFromFares = onSnapshot(faresCollection, (snapshot) => {
                             fareMatrix = {};
                             snapshot.docs.forEach(doc => {
+                                // The document ID is the bus number (e.g., "KSRTC")
                                 fareMatrix[doc.id] = doc.data();
                             });
                         });
