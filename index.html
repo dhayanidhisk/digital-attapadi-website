@@ -387,7 +387,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, setDoc, getDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- Canvas Environment Integration ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'digital-attapadi';
@@ -404,7 +404,7 @@
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
         // --- Firebase Services ---
-        let app, db, auth, analytics, busCollection, filterStopsDocRef, faresCollection;
+        let db, auth;
 
         document.addEventListener('DOMContentLoaded', function() {
           try {
@@ -416,8 +416,6 @@
             let fareMatrix = {};
             const openDropdowns = new Set();
             let isAdmin = false;
-            let currentUserId = null;
-            let isAuthReady = false;
             let unsubscribeFromBuses = null;
             let unsubscribeFromFilters = null;
             let unsubscribeFromFares = null;
@@ -476,10 +474,6 @@
             const messageText = document.getElementById('message-text');
 
             // --- DATA CONSTANTS ---
-             // SECURITY WARNING: Storing admin credentials and logic on the client-side is highly insecure.
-             // Anyone with browser developer tools can view this code, find the credentials, and grant themselves admin privileges.
-             // For a production application, this should be replaced with a secure backend authentication system,
-             // such as Firebase Authentication with Custom Claims set via a Cloud Function.
             const adminUsers = [
                 { username: 'dhayaceoda', password: '90474470770', name: 'Dhaya(Thangakutty)' },
                 { username: 'poonutty', password: '0313', name: 'Madhu(Poonutty)' }
@@ -581,7 +575,6 @@
 
             // --- AUTHENTICATION ---
             const checkAdminStatus = () => {
-                // SECURITY: This check is purely client-side and insecure.
                 isAdmin = localStorage.getItem('isAdmin') === 'true';
                 renderAuthControls();
                 updateAndRenderSchedule();
@@ -811,203 +804,56 @@
 
             // --- FIRESTORE CRUD OPERATIONS ---
             const addSampleDataIfNeeded = async () => {
-                if (busData.length > 0) return; // Don't add if data exists
-                console.log("Database is empty. Adding sample bus routes.");
+                if (busData.length > 0) {
+                    console.log("Sample data already exists. Skipping creation.");
+                    return; 
+                }
+                console.log("Database is empty. Adding sample bus routes for all users.");
                 const sampleBuses = [
-                    {
-                        busNumber: "KSRTC",
-                        origin: "Palakkad",
-                        destination: "Anaikkatty",
-                        seatCapacity: 48,
-                        status: { type: 'on-time', minutes: 0 },
-                        stops: [
-                            { name: "Palakkad", scheduledTime: "08:00", fare: 0, waitingTime: 0 },
-                            { name: "Mannarkkad", scheduledTime: "09:00", fare: 45, waitingTime: 5 },
-                            { name: "Goolikkadavu Jn", scheduledTime: "10:00", fare: 45, waitingTime: 0 },
-                            { name: "Kottathara", scheduledTime: "10:30", fare: 20, waitingTime: 0 },
-                            { name: "Anaikatti", scheduledTime: "11:00", fare: 20, waitingTime: 0 },
-                        ]
-                    },
-                    {
-                        busNumber: "SPR",
-                        origin: "Anaikkatty",
-                        destination: "Mannarkkad",
-                        seatCapacity: 40,
-                        status: { type: 'on-time', minutes: 0 },
-                        stops: [
-                            { name: "Anaikkatty", scheduledTime: "18:30", fare: 0, waitingTime: 0 },
-                            { name: "Kottathara", scheduledTime: "19:00", fare: 25, waitingTime: 2 },
-                            { name: "Agali Jn", scheduledTime: "19:20", fare: 10, waitingTime: 0 },
-                            { name: "Goolikkadavu Jn", scheduledTime: "19:30", fare: 5, waitingTime: 5 },
-                            { name: "Mukkali", scheduledTime: "20:00", fare: 25, waitingTime: 0 },
-                            { name: "Mannarkkad", scheduledTime: "20:45", fare: 20, waitingTime: 0 },
-                        ]
-                    },
-                    {
-                        busNumber: "RPC",
-                        origin: "Sholayur",
-                        destination: "Palakkad",
-                        seatCapacity: 52,
-                        status: { type: 'late', minutes: 5 },
-                        stops: [
-                            { name: "Sholayur", scheduledTime: "17:00", fare: 0, waitingTime: 0 },
-                            { name: "Goolikkadavu Jn", scheduledTime: "18:00", fare: 30, waitingTime: 10 },
-                            { name: "Mannarkkad", scheduledTime: "19:00", fare: 45, waitingTime: 5 },
-                            { name: "Palakkad", scheduledTime: "20:00", fare: 45, waitingTime: 0 },
-                        ]
-                    },
-                    {
-                        busNumber: "SRG",
-                        origin: "Goolikkadavu Jn",
-                        destination: "Anaikkatty",
-                        seatCapacity: 38,
-                        status: { type: 'on-time', minutes: 0 },
-                        stops: [
-                            { name: "Goolikkadavu Jn", scheduledTime: "11:30", fare: 0, waitingTime: 0 },
-                            { name: "Agali Jn", scheduledTime: "11:40", fare: 10, waitingTime: 2 },
-                            { name: "Kottathara", scheduledTime: "12:00", fare: 15, waitingTime: 0 },
-                            { name: "Anaikkatty", scheduledTime: "12:30", fare: 20, waitingTime: 0 },
-                        ]
-                    },
-                    {
-                        busNumber: "KMS",
-                        origin: "Mannarkkad",
-                        destination: "Sholayur",
-                        seatCapacity: 45,
-                        status: { type: 'early', minutes: 3 },
-                        stops: [
-                            { name: "Mannarkkad", scheduledTime: "14:00", fare: 0, waitingTime: 0 },
-                            { name: "Mukkali", scheduledTime: "14:45", fare: 20, waitingTime: 0 },
-                            { name: "Goolikkadavu Jn", scheduledTime: "15:15", fare: 25, waitingTime: 5 },
-                            { name: "Sholayur", scheduledTime: "16:15", fare: 30, waitingTime: 0 },
-                        ]
-                    },
-                    {
-                        busNumber: "Abirami",
-                        origin: "Palakkad",
-                        destination: "Goolikkadavu Jn",
-                        seatCapacity: 42,
-                        status: { type: 'on-time', minutes: 0 },
-                        stops: [
-                            { name: "Palakkad", scheduledTime: "10:30", fare: 0, waitingTime: 0 },
-                            { name: "Mannarkkad", scheduledTime: "11:30", fare: 40, waitingTime: 5 },
-                            { name: "Mukkali", scheduledTime: "12:00", fare: 22, waitingTime: 0 },
-                            { name: "Goolikkadavu Jn", scheduledTime: "12:30", fare: 25, waitingTime: 0 },
-                        ]
-                    },
-                    {
-                        busNumber: "SSG", 
-                        origin: "Anaikkatty",
-                        destination: "Palakkad",
-                        seatCapacity: 40,
-                        status: { type: 'on-time', minutes: 0 },
-                        stops: [
-                            { name: "Anaikkatty", scheduledTime: "09:15", fare: 0, waitingTime: 0 },
-                            { name: "Kottathara", scheduledTime: "09:45", fare: 20, waitingTime: 2 },
-                            { name: "Goolikkadavu Jn", scheduledTime: "10:15", fare: 15, waitingTime: 5 },
-                            { name: "Mannarkkad", scheduledTime: "11:15", fare: 45, waitingTime: 5 },
-                            { name: "Palakkad", scheduledTime: "12:15", fare: 45, waitingTime: 0 },
-                        ]
-                    },
-                    {
-                        busNumber: "JAI",
-                        origin: "Palakkad",
-                        destination: "Sholayur",
-                        seatCapacity: 44,
-                        status: { type: 'on-time', minutes: 0 },
-                        stops: [
-                            { name: "Palakkad", scheduledTime: "13:00", fare: 0, waitingTime: 0 },
-                            { name: "Mannarkkad", scheduledTime: "14:00", fare: 45, waitingTime: 5 },
-                            { name: "Goolikkadavu Jn", scheduledTime: "15:00", fare: 45, waitingTime: 5 },
-                            { name: "Sholayur", scheduledTime: "16:00", fare: 30, waitingTime: 0 },
-                        ]
-                    },
-                    {
-                        busNumber: "RKG",
-                        origin: "Goolikkadavu Jn",
-                        destination: "Palakkad",
-                        seatCapacity: 49,
-                        status: { type: 'late', minutes: 8 },
-                        stops: [
-                            { name: "Goolikkadavu Jn", scheduledTime: "16:30", fare: 0, waitingTime: 0 },
-                            { name: "Mannarkkad", scheduledTime: "17:30", fare: 45, waitingTime: 5 },
-                            { name: "Palakkad", scheduledTime: "18:30", fare: 45, waitingTime: 0 },
-                        ]
-                    }
+                    { busNumber: "KSRTC", origin: "Palakkad", destination: "Anaikkatty", seatCapacity: 48, status: { type: 'on-time', minutes: 0 }, stops: [ { name: "Palakkad", scheduledTime: "08:00", fare: 0, waitingTime: 0 }, { name: "Mannarkkad", scheduledTime: "09:00", fare: 45, waitingTime: 5 }, { name: "Goolikkadavu Jn", scheduledTime: "10:00", fare: 45, waitingTime: 0 }, { name: "Kottathara", scheduledTime: "10:30", fare: 20, waitingTime: 0 }, { name: "Anaikatti", scheduledTime: "11:00", fare: 20, waitingTime: 0 } ] },
+                    { busNumber: "SPR", origin: "Anaikkatty", destination: "Mannarkkad", seatCapacity: 40, status: { type: 'on-time', minutes: 0 }, stops: [ { name: "Anaikkatty", scheduledTime: "18:30", fare: 0, waitingTime: 0 }, { name: "Kottathara", scheduledTime: "19:00", fare: 25, waitingTime: 2 }, { name: "Agali Jn", scheduledTime: "19:20", fare: 10, waitingTime: 0 }, { name: "Goolikkadavu Jn", scheduledTime: "19:30", fare: 5, waitingTime: 5 }, { name: "Mukkali", scheduledTime: "20:00", fare: 25, waitingTime: 0 }, { name: "Mannarkkad", scheduledTime: "20:45", fare: 20, waitingTime: 0 } ] },
+                    { busNumber: "RPC", origin: "Sholayur", destination: "Palakkad", seatCapacity: 52, status: { type: 'late', minutes: 5 }, stops: [ { name: "Sholayur", scheduledTime: "17:00", fare: 0, waitingTime: 0 }, { name: "Goolikkadavu Jn", scheduledTime: "18:00", fare: 30, waitingTime: 10 }, { name: "Mannarkkad", scheduledTime: "19:00", fare: 45, waitingTime: 5 }, { name: "Palakkad", scheduledTime: "20:00", fare: 45, waitingTime: 0 } ] },
+                    { busNumber: "SRG", origin: "Goolikkadavu Jn", destination: "Anaikkatty", seatCapacity: 38, status: { type: 'on-time', minutes: 0 }, stops: [ { name: "Goolikkadavu Jn", scheduledTime: "11:30", fare: 0, waitingTime: 0 }, { name: "Agali Jn", scheduledTime: "11:40", fare: 10, waitingTime: 2 }, { name: "Kottathara", scheduledTime: "12:00", fare: 15, waitingTime: 0 }, { name: "Anaikkatty", scheduledTime: "12:30", fare: 20, waitingTime: 0 } ] },
+                    { busNumber: "KMS", origin: "Mannarkkad", destination: "Sholayur", seatCapacity: 45, status: { type: 'early', minutes: 3 }, stops: [ { name: "Mannarkkad", scheduledTime: "14:00", fare: 0, waitingTime: 0 }, { name: "Mukkali", scheduledTime: "14:45", fare: 20, waitingTime: 0 }, { name: "Goolikkadavu Jn", scheduledTime: "15:15", fare: 25, waitingTime: 5 }, { name: "Sholayur", scheduledTime: "16:15", fare: 30, waitingTime: 0 } ] },
+                    { busNumber: "Abirami", origin: "Palakkad", destination: "Goolikkadavu Jn", seatCapacity: 42, status: { type: 'on-time', minutes: 0 }, stops: [ { name: "Palakkad", scheduledTime: "10:30", fare: 0, waitingTime: 0 }, { name: "Mannarkkad", scheduledTime: "11:30", fare: 40, waitingTime: 5 }, { name: "Mukkali", scheduledTime: "12:00", fare: 22, waitingTime: 0 }, { name: "Goolikkadavu Jn", scheduledTime: "12:30", fare: 25, waitingTime: 0 } ] },
+                    { busNumber: "SSG", origin: "Anaikkatty", destination: "Palakkad", seatCapacity: 40, status: { type: 'on-time', minutes: 0 }, stops: [ { name: "Anaikkatty", scheduledTime: "09:15", fare: 0, waitingTime: 0 }, { name: "Kottathara", scheduledTime: "09:45", fare: 20, waitingTime: 2 }, { name: "Goolikkadavu Jn", scheduledTime: "10:15", fare: 15, waitingTime: 5 }, { name: "Mannarkkad", scheduledTime: "11:15", fare: 45, waitingTime: 5 }, { name: "Palakkad", scheduledTime: "12:15", fare: 45, waitingTime: 0 } ] },
+                    { busNumber: "JAI", origin: "Palakkad", destination: "Sholayur", seatCapacity: 44, status: { type: 'on-time', minutes: 0 }, stops: [ { name: "Palakkad", scheduledTime: "13:00", fare: 0, waitingTime: 0 }, { name: "Mannarkkad", scheduledTime: "14:00", fare: 45, waitingTime: 5 }, { name: "Goolikkadavu Jn", scheduledTime: "15:00", fare: 45, waitingTime: 5 }, { name: "Sholayur", scheduledTime: "16:00", fare: 30, waitingTime: 0 } ] },
+                    { busNumber: "RKG", origin: "Goolikkadavu Jn", destination: "Palakkad", seatCapacity: 49, status: { type: 'late', minutes: 8 }, stops: [ { name: "Goolikkadavu Jn", scheduledTime: "16:30", fare: 0, waitingTime: 0 }, { name: "Mannarkkad", scheduledTime: "17:30", fare: 45, waitingTime: 5 }, { name: "Palakkad", scheduledTime: "18:30", fare: 45, waitingTime: 0 } ] }
                 ];
+                
+                const faresData = {
+                    "KSRTC": { "Palakkad_Mannarkkad": 45, "Palakkad_Goolikkadavu Jn": 90, "Mannarkkad_Goolikkadavu Jn": 45, "Goolikkadavu Jn_Kottathara": 20 },
+                    "SPR": { "Anaikkatty_Kottathara": 25, "Anaikkatty_Agali Jn": 35, "Kottathara_Goolikkadavu Jn": 15, "Goolikkadavu Jn_Mannarkkad": 45 },
+                    "RPC": { "Sholayur_Goolikkadavu Jn": 30, "Goolikkadavu Jn_Mannarkkad": 45, "Mannarkkad_Palakkad": 45 },
+                    "SRG": { "Goolikkadavu Jn_Agali Jn": 10, "Agali Jn_Kottathara": 15, "Kottathara_Anaikkatty": 20 },
+                    "KMS": { "Mannarkkad_Mukkali": 20, "Mukkali_Goolikkadavu Jn": 25, "Goolikkadavu Jn_Sholayur": 30 },
+                    "Abirami": { "Palakkad_Mannarkkad": 40, "Mannarkkad_Mukkali": 22, "Mukkali_Goolikkadavu Jn": 25 },
+                    "SSG": { "Anaikkatty_Kottathara": 20, "Kottathara_Goolikkadavu Jn": 15, "Goolikkadavu Jn_Mannarkkad": 45, "Mannarkkad_Palakkad": 45 },
+                    "JAI": { "Palakkad_Mannarkkad": 45, "Mannarkkad_Goolikkadavu Jn": 45, "Goolikkadavu Jn_Sholayur": 30 },
+                    "RKG": { "Goolikkadavu Jn_Mannarkkad": 45, "Mannarkkad_Palakkad": 45 }
+                };
 
                 try {
-                    for (const bus of sampleBuses) {
-                        await addDoc(busCollection, bus);
-                    }
-                    await setDoc(filterStopsDocRef, { stops: ['Goolikkadavu Jn', 'Mannarkkad', 'Anaikatti'] });
+                    const publicDataPath = `artifacts/${appId}/public/data`;
+                    const busCollection = collection(db, `${publicDataPath}/buses`);
+                    const faresCollection = collection(db, `${publicDataPath}/fares`);
+                    const filterStopsDocRef = doc(db, `${publicDataPath}/config/filterStops`);
                     
-                    // Add sample fares for KSRTC
-                    await setDoc(doc(faresCollection, 'KSRTC'), {
-                        "Palakkad_Mannarkkad": 45,
-                        "Palakkad_Goolikkadavu Jn": 90,
-                        "Mannarkkad_Goolikkadavu Jn": 45,
-                        "Goolikkadavu Jn_Kottathara": 20
+                    const batch = writeBatch(db);
+
+                    sampleBuses.forEach(bus => {
+                        const newBusRef = doc(busCollection); // Create a new document reference
+                        batch.set(newBusRef, bus);
                     });
 
-                    // Add sample fares for SPR
-                    await setDoc(doc(faresCollection, 'SPR'), {
-                        "Anaikkatty_Kottathara": 25,
-                        "Anaikkatty_Agali Jn": 35,
-                        "Kottathara_Goolikkadavu Jn": 15,
-                        "Goolikkadavu Jn_Mannarkkad": 45
-                    });
-
-                    // Add sample fares for RPC
-                    await setDoc(doc(faresCollection, 'RPC'), {
-                        "Sholayur_Goolikkadavu Jn": 30,
-                        "Goolikkadavu Jn_Mannarkkad": 45,
-                        "Mannarkkad_Palakkad": 45
+                    Object.entries(faresData).forEach(([busNumber, fares]) => {
+                        const fareDocRef = doc(faresCollection, busNumber);
+                        batch.set(fareDocRef, fares);
                     });
                     
-                    // Add sample fares for SRG
-                    await setDoc(doc(faresCollection, 'SRG'), {
-                        "Goolikkadavu Jn_Agali Jn": 10,
-                        "Agali Jn_Kottathara": 15,
-                        "Kottathara_Anaikkatty": 20
-                    });
-
-                    // Add sample fares for KMS
-                    await setDoc(doc(faresCollection, 'KMS'), {
-                        "Mannarkkad_Mukkali": 20,
-                        "Mukkali_Goolikkadavu Jn": 25,
-                        "Goolikkadavu Jn_Sholayur": 30
-                    });
-
-                    // Add sample fares for Abirami
-                    await setDoc(doc(faresCollection, 'Abirami'), {
-                        "Palakkad_Mannarkkad": 40,
-                        "Mannarkkad_Mukkali": 22,
-                        "Mukkali_Goolikkadavu Jn": 25
-                    });
-
-                    // Add sample fares for SSG
-                    await setDoc(doc(faresCollection, 'SSG'), {
-                        "Anaikkatty_Kottathara": 20,
-                        "Kottathara_Goolikkadavu Jn": 15,
-                        "Goolikkadavu Jn_Mannarkkad": 45,
-                        "Mannarkkad_Palakkad": 45
-                    });
-
-                    // Add sample fares for JAI
-                    await setDoc(doc(faresCollection, 'JAI'), {
-                        "Palakkad_Mannarkkad": 45,
-                        "Mannarkkad_Goolikkadavu Jn": 45,
-                        "Goolikkadavu Jn_Sholayur": 30
-                    });
-
-                    // Add sample fares for RKG
-                    await setDoc(doc(faresCollection, 'RKG'), {
-                        "Goolikkadavu Jn_Mannarkkad": 45,
-                        "Mannarkkad_Palakkad": 45
-                    });
-
-
+                    batch.set(filterStopsDocRef, { stops: ['Goolikkadavu Jn', 'Mannarkkad', 'Anaikatti'] });
+                    
+                    await batch.commit();
                     showMessage("Added sample bus routes and fares to get you started!");
                 } catch (error) {
                     console.error("Error adding sample data:", error);
@@ -1016,10 +862,7 @@
             };
 
             const handleAddBus = async () => {
-                if (!isAuthReady || !busCollection) {
-                    showMessage("Connecting to the database... Please try again in a moment.");
-                    return;
-                }
+                const busCollection = collection(db, `artifacts/${appId}/public/data/buses`);
                 const busNameOptions = predefinedBusNames.map(s => `<option value="${s}">${s}</option>`).join('');
                 const originOptions = predefinedOriginStops.map(s => `<option value="${s}">${s}</option>`).join('');
                 const destinationOptions = predefinedDestinationStops.map(s => `<option value="${s}">${s}</option>`).join('');
@@ -1055,7 +898,6 @@
             };
 
             const handleEditBus = async (busId) => {
-                if (!isAuthReady) { showMessage("Not connected. Please wait."); return; }
                 const bus = busData.find(b => b.id === busId);
                 const isCustomBusName = !predefinedBusNames.includes(bus.busNumber);
                 const isCustomOrigin = !predefinedOriginStops.includes(bus.origin);
@@ -1074,7 +916,7 @@
                 `;
                 try {
                     const data = await showModal('Edit Bus Route', formHtml);
-                    const busDocRef = doc(db, busCollection.path, busId);
+                    const busDocRef = doc(db, `artifacts/${appId}/public/data/buses`, busId);
                     await updateDoc(busDocRef, {
                         busNumber: data.busNumber,
                         origin: data.origin,
@@ -1093,15 +935,19 @@
             };
 
             const handleDeleteBus = (busId) => {
-                if (!isAuthReady) { showMessage("Not connected. Please wait."); return; }
                 const busToDelete = busData.find(b => b.id === busId);
                 if (!busToDelete) return;
                 
                 showConfirmation("This will permanently delete the entire bus route and all its stops. This action cannot be undone.", async () => {
                     try {
-                        // Also delete fares associated with the bus's name (ID)
-                        await deleteDoc(doc(db, faresCollection.path, busToDelete.busNumber));
-                        await deleteDoc(doc(db, busCollection.path, busId));
+                        const busDocRef = doc(db, `artifacts/${appId}/public/data/buses`, busId);
+                        const fareDocRef = doc(db, `artifacts/${appId}/public/data/fares`, busToDelete.busNumber);
+                        
+                        const batch = writeBatch(db);
+                        batch.delete(busDocRef);
+                        batch.delete(fareDocRef);
+                        await batch.commit();
+
                         showMessage("Bus route and fares deleted.");
                     } catch(error) {
                         console.error("Error deleting bus:", error);
@@ -1111,7 +957,6 @@
             };
             
             const handleAddStop = async (busId) => {
-                if (!isAuthReady) { showMessage("Not connected. Please wait."); return; }
                 const bus = busData.find(b => b.id === busId);
                 const stopOptions = predefinedStops.map(s => `<option value="${s}">${s}</option>`).join('');
                 const formHtml = `
@@ -1125,7 +970,8 @@
                     data.scheduledTime = to24Hour(data.hour, data.minute, data.ampm);
                     const newStops = [...bus.stops, { name: data.name, scheduledTime: data.scheduledTime, fare: Number(data.fare) || 0, waitingTime: Number(data.waitingTime) || 0 }];
                     newStops.sort((a, b) => parseTime(a.scheduledTime) - parseTime(b.scheduledTime));
-                    await updateDoc(doc(db, busCollection.path, busId), { stops: newStops });
+                    const busDocRef = doc(db, `artifacts/${appId}/public/data/buses`, busId);
+                    await updateDoc(busDocRef, { stops: newStops });
                     showMessage("Stop added to route.");
                 } catch(error) {
                     if (error.message.includes("Modal cancelled")) {
@@ -1138,7 +984,6 @@
             };
 
             const handleEditStop = async (busId, stopIndex) => {
-                if (!isAuthReady) { showMessage("Not connected. Please wait."); return; }
                 const bus = busData.find(b => b.id === busId);
                 const stop = bus.stops[stopIndex];
                 const isCustomStop = !predefinedStops.includes(stop.name);
@@ -1156,7 +1001,8 @@
                     const newStops = [...bus.stops];
                     newStops[stopIndex] = { ...newStops[stopIndex], name: data.name, scheduledTime: data.scheduledTime, fare: Number(data.fare) || 0, waitingTime: Number(data.waitingTime) || 0 };
                     newStops.sort((a,b) => parseTime(a.scheduledTime) - parseTime(b.scheduledTime));
-                    await updateDoc(doc(db, busCollection.path, busId), { stops: newStops });
+                    const busDocRef = doc(db, `artifacts/${appId}/public/data/buses`, busId);
+                    await updateDoc(busDocRef, { stops: newStops });
                     showMessage("Stop details updated.");
                 } catch(error) {
                     if (error.message.includes("Modal cancelled")) {
@@ -1169,13 +1015,13 @@
             };
             
             const handleDeleteStop = async (busId, stopIndex) => {
-                 if (!isAuthReady) { showMessage("Not connected. Please wait."); return; }
                  showConfirmation("This will remove the stop from the route. Are you sure?", async () => {
                      try {
                          const bus = busData.find(b => b.id === busId);
                          const newStops = [...bus.stops];
                          newStops.splice(stopIndex, 1);
-                         await updateDoc(doc(db, busCollection.path, busId), { stops: newStops });
+                         const busDocRef = doc(db, `artifacts/${appId}/public/data/buses`, busId);
+                         await updateDoc(busDocRef, { stops: newStops });
                          showMessage("Stop removed.");
                      } catch(error) {
                          console.error("Error deleting stop:", error);
@@ -1187,6 +1033,7 @@
             const addFilterStop = async (stopName) => {
                 if (!stopName) return;
                 const newStops = [...new Set([...filterableStops, stopName])].sort();
+                const filterStopsDocRef = doc(db, `artifacts/${appId}/public/data/config/filterStops`);
                 await setDoc(filterStopsDocRef, { stops: newStops });
                 showMessage(`Added "${stopName}" to filters.`);
                 showManageStopsModal(); // Refresh the modal
@@ -1194,6 +1041,7 @@
 
             const removeFilterStop = async (stopName) => {
                 const newStops = filterableStops.filter(s => s !== stopName);
+                const filterStopsDocRef = doc(db, `artifacts/${appId}/public/data/config/filterStops`);
                 await setDoc(filterStopsDocRef, { stops: newStops });
                 showMessage(`Removed "${stopName}" from filters.`);
                 showManageStopsModal(); // Refresh the modal
@@ -1224,7 +1072,8 @@
                         type: data.type,
                         minutes: data.type === 'on-time' ? 0 : Number(data.minutes) || 0
                     };
-                    await updateDoc(doc(db, busCollection.path, busId), { status: newStatus });
+                    const busDocRef = doc(db, `artifacts/${appId}/public/data/buses`, busId);
+                    await updateDoc(busDocRef, { status: newStatus });
                     showMessage('Bus status updated.');
                 } catch(error) {
                      if (error.message.includes("Modal cancelled")) {
@@ -1259,9 +1108,7 @@
                     if (searchQuery || currentFilter !== 'all') {
                         setStatus(`No results found for your criteria.`);
                     } else {
-                        const message = isAdmin
-                            ? "No buses found. Click 'Add New Bus' to create a schedule."
-                            : "No buses found for today's schedule.";
+                        const message = "No buses found for today's schedule.";
                         setStatus(message);
                     }
                     return;
@@ -1285,8 +1132,6 @@
                     }
                     
                     const isDropdownOpen = openDropdowns.has(bus.id);
-                    // NOTE: This hardcoded height assumes timeline items have a fixed height.
-                    // If content makes items taller, the dot's position might be inaccurate.
                     const itemHeight = 72; 
                     const liveIconTopPosition = bus.liveIconPositionIndex * itemHeight;
 
@@ -1382,7 +1227,6 @@
             };
 
             const updateAndRenderSchedule = () => {
-                if (!isAuthReady) return; 
                 const currentTime = new Date();
                 
                 let liveBusData = busData.map(bus => {
@@ -1437,7 +1281,6 @@
                                 const progressInSegment = (currentTime.getTime() - lastStopDepartureTime) / segmentDuration;
                                 liveIconPositionIndex = (nextStopIndex - 1) + Math.min(1, Math.max(0, progressInSegment));
                             } else {
-                                // If duration is zero or negative, place dot at the last stop.
                                 liveIconPositionIndex = nextStopIndex - 1;
                             }
                         }
@@ -1445,7 +1288,6 @@
                          liveIconPositionIndex = 0;
                     }
 
-                    // Check for notifications
                     if (watchedBuses.includes(bus.id) && !notifiedBuses.includes(bus.id) && etaAtGoolikkadavu !== null && etaAtGoolikkadavu <= 5 && etaAtGoolikkadavu > 0) {
                         showMessage(`Bus ${bus.busNumber} is approx. ${etaAtGoolikkadavu} minutes away!`);
                         notifiedBuses.push(bus.id);
@@ -1454,7 +1296,6 @@
                     return { ...bus, etaAtGoolikkadavu, liveIconPositionIndex, isFinished };
                 });
 
-                // Filter based on search query
                 let filteredBusData = liveBusData;
                 if (searchQuery) {
                     filteredBusData = filteredBusData.filter(bus => {
@@ -1464,7 +1305,6 @@
                     });
                 }
                 
-                // Apply the main filter
                 if (currentFilter === 'live') {
                     filteredBusData = filteredBusData.filter(bus => !bus.isFinished);
                 } else if (currentFilter !== 'all') {
@@ -1473,15 +1313,12 @@
                     );
                 }
 
-                // Sort the filtered data chronologically by departure time
                 filteredBusData.sort((a, b) => {
                     const timeA = a.stops.length > 0 ? parseTime(a.stops[0].scheduledTime) : 0;
                     const timeB = b.stops.length > 0 ? parseTime(b.stops[0].scheduledTime) : 0;
-                    
                     if (!timeA && !timeB) return 0;
                     if (!timeA) return 1;
                     if (!timeB) return -1;
-
                     return timeA - timeB;
                 });
                 
@@ -1519,7 +1356,6 @@
                     const fromIndex = bus.stops.findIndex(s => s.name === fromStopName);
                     const toIndex = bus.stops.findIndex(s => s.name === toStopName);
                     
-                    // Fares are stored by bus number, which is assumed to be the doc ID in the 'fares' collection.
                     if (fromIndex !== -1 && toIndex !== -1 && toIndex > fromIndex) {
                         const busFares = fareMatrix[bus.busNumber] || {};
                         const fareKey = `${fromStopName}_${toStopName}`;
@@ -1592,8 +1428,8 @@
                 });
 
                 try {
-                    // Save fares using the bus number as the document ID
-                    await setDoc(doc(faresCollection, busNumber), newFares);
+                    const fareDocRef = doc(db, `artifacts/${appId}/public/data/fares`, busNumber);
+                    await setDoc(fareDocRef, newFares);
                     showMessage("Fares saved successfully!");
                 } catch (error) {
                     console.error("Error saving fares:", error);
@@ -1780,89 +1616,83 @@
             });
 
             // --- INITIALIZATION ---
-            const initializeAppAndData = async () => {
-                // Load watched buses from local storage
-                watchedBuses = JSON.parse(localStorage.getItem('watchedBuses')) || [];
-
+            async function initializeAppAndData() {
                 // Initialize Firebase
-                app = initializeApp(firebaseConfig);
+                const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
                 try {
-                    analytics = getAnalytics(app);
+                    getAnalytics(app);
                 } catch (e) {
                     console.warn("Firebase Analytics could not be initialized:", e.message);
                 }
-
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        currentUserId = user.uid;
-                        console.log("Authenticated User ID:", currentUserId);
-                        
-                        // Define Firestore paths after user is authenticated
-                        const publicDataPath = `artifacts/${appId}/public/data`;
-                        busCollection = collection(db, `${publicDataPath}/buses`);
-                        filterStopsDocRef = doc(db, `${publicDataPath}/config/filterStops`);
-                        faresCollection = collection(db, `${publicDataPath}/fares`);
-
-                        // Detach old listeners if they exist to prevent memory leaks on re-authentication
-                        if (unsubscribeFromBuses) unsubscribeFromBuses();
-                        if (unsubscribeFromFilters) unsubscribeFromFilters();
-                        if (unsubscribeFromFares) unsubscribeFromFares();
-
-                        // Attach new listeners
-                        unsubscribeFromBuses = onSnapshot(busCollection, (snapshot) => {
-                            busData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                            isAuthReady = true; // Mark as ready once we get data
-                            
-                            // The check inside addSampleDataIfNeeded will prevent re-adding data
-                            addSampleDataIfNeeded();
-                            updateAndRenderSchedule();
-                        }, (error) => {
-                            console.error("Error fetching bus data:", error);
-                            setStatus("Error loading schedule. Please check connection.", true);
-                        });
-
-                        unsubscribeFromFilters = onSnapshot(filterStopsDocRef, (docSnap) => {
-                            if (docSnap.exists()) {
-                                filterableStops = docSnap.data().stops || [];
-                            } else {
-                                filterableStops = [];
-                            }
-                            updateFilterDropdown();
-                            updateAndRenderSchedule();
-                        }, (error) => {
-                            console.error("Error fetching filter stops:", error);
-                        });
-
-                        unsubscribeFromFares = onSnapshot(faresCollection, (snapshot) => {
-                            fareMatrix = {};
-                            snapshot.docs.forEach(doc => {
-                                // The document ID is the bus number (e.g., "KSRTC")
-                                fareMatrix[doc.id] = doc.data();
-                            });
-                        });
-
-                    } else {
-                        console.log("User is signed out.");
-                        // Handle signed-out state if necessary
-                    }
-                });
 
                 // Sign in the user
                 try {
                     if (initialAuthToken) {
                         await signInWithCustomToken(auth, initialAuthToken);
-                        console.log("Signed in with custom token.");
                     } else {
                         await signInAnonymously(auth);
-                        console.log("Signed in anonymously.");
                     }
                 } catch (error) {
-                    console.error("Authentication failed:", error);
+                    console.error("Critical authentication error:", error);
                     setStatus("Could not connect to the server.", true);
+                    return; // Stop execution if auth fails
                 }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        console.log("User authenticated with UID:", user.uid);
+                        // Detach old listeners if they exist to prevent memory leaks
+                        if (unsubscribeFromBuses) unsubscribeFromBuses();
+                        if (unsubscribeFromFilters) unsubscribeFromFilters();
+                        if (unsubscribeFromFares) unsubscribeFromFares();
+                        
+                        // Attach listeners now that we have a user
+                        attachFirestoreListeners();
+                    } else {
+                        console.log("User is signed out.");
+                        setStatus("Not connected. Please refresh.", true);
+                    }
+                });
             };
+
+            function attachFirestoreListeners() {
+                const publicDataPath = `artifacts/${appId}/public/data`;
+                const busCollectionRef = collection(db, `${publicDataPath}/buses`);
+                const filterStopsDocRef = doc(db, `${publicDataPath}/config/filterStops`);
+                const faresCollectionRef = collection(db, `${publicDataPath}/fares`);
+
+                unsubscribeFromBuses = onSnapshot(busCollectionRef, (snapshot) => {
+                    busData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    if (snapshot.empty) {
+                        addSampleDataIfNeeded();
+                    } else {
+                        updateAndRenderSchedule();
+                    }
+                }, (error) => {
+                    console.error("Error fetching bus data:", error);
+                    setStatus("Error loading schedule. Please check connection.", true);
+                });
+
+                unsubscribeFromFilters = onSnapshot(filterStopsDocRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        filterableStops = docSnap.data().stops || [];
+                    } else {
+                        filterableStops = [];
+                    }
+                    updateFilterDropdown();
+                }, (error) => {
+                    console.error("Error fetching filter stops:", error);
+                });
+
+                unsubscribeFromFares = onSnapshot(faresCollectionRef, (snapshot) => {
+                    fareMatrix = {};
+                    snapshot.docs.forEach(doc => {
+                        fareMatrix[doc.id] = doc.data();
+                    });
+                });
+            }
 
             // Start the application
             initializeAppAndData();
@@ -1872,11 +1702,7 @@
             updateFilterDropdown();
           } catch(e) {
             console.error("A critical error occurred in the main script:", e);
-            const statusMessage = document.getElementById('status-message');
-            if (statusMessage) {
-                statusMessage.textContent = "An unexpected error occurred. Please refresh the page.";
-                statusMessage.className = 'p-8 text-center text-red-500';
-            }
+            setStatus("An unexpected error occurred. Please refresh the page.", true);
           }
         });
     </script>
